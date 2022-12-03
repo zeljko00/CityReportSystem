@@ -1,0 +1,33 @@
+.header {
+    padding: 1% 1% 1% 1%;
+    display: flex;
+    flex-direction: row;
+  }
+  
+  .amblem {
+    justify-content: center;
+  }
+  
+  .amblem_image {
+    height: 21vmin;
+  }
+  
+  .title {
+    text-align: center;
+    color: rgb(12, 12, 12);
+    font-family: 'Segoe UI','Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', 'Arial', 'Sans-Serif';
+    padding-top: 2.2vh;
+    width: calc(100vw - 20vmin - 5vmin);
+    font-size: calc(2.5vw + 5px);
+    letter-spacing: 0.25vw;
+    word-spacing: 1.1vw;
+
+    background: linear-gradient(
+    to right, 
+    rgb(1, 29, 59), 
+    rgb(255, 255, 255)
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  }
+  

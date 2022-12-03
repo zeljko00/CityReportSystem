@@ -1,24 +1,44 @@
-import logo from './logo.svg';
-import './App.css';
+import React from "react";
+import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import "./App.css";
+import { CitizenLogIn } from "./pages/CitizenLogIn";
+import { CitizenSignUp } from "./pages/CitizenSignUp/index";
+import { CityServiceLogIn } from "./pages/CityServiceLogIn/index";
+import initializeI18n from "./utils/internationalization/initialize";
+
+initializeI18n();
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Router>
+      <Routes>
+        <Route
+          path="/CityReportSystem/citizen"
+          exact
+          element={<CitizenLogIn />}
+        ></Route>
+        <Route
+          path="/CityReportSystem"
+          exact
+          element={<CitizenLogIn />}
+        ></Route>
+        <Route
+          path="/CityReportSystem/citizen/login"
+          exact
+          element={<CitizenLogIn />}
+        ></Route>
+        <Route
+          path="/CityReportSystem/cityService/login"
+          exact
+          element={<CityServiceLogIn />}
+        ></Route>
+        <Route
+          path="/CityReportSystem/citizen/signup"
+          exact
+          element={<CitizenSignUp />}
+        ></Route>
+      </Routes>
+    </Router>
   );
 }
 
