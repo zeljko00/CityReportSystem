@@ -1,7 +1,13 @@
 .footer {
-    height: 3vh;
     text-align: center;
     padding: 1% 1% 1% 1%;
     color: rgb(120, 127, 134);
     font-size: calc(4px + 2vmin);
   }
+  .lang-selector{
+    /* position: fixed;
+    bottom: 30px;
+    left: 30px; */
+    width: 50px;
+    margin-left: 20px;
+}

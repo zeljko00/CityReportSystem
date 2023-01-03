@@ -31,3 +31,6 @@
 /* #register_password_help div{
     color: aquamarine;
 } */
+.ant-form-item {
+    margin-bottom: 29px;
+}

@@ -41,24 +41,13 @@ export function SignUpForm() {
         console.log(response.data);
       })
       .catch((e) => {
-        const status = e.message;
-        if (status.endsWith("403")) {
-          messageApi.open({
-            type: "error",
-            content: t("forbidden"),
-            duration: 0,
-            style: { fontSize: "large" },
-          });
-          setTimeout(messageApi.destroy, 4000);
-        } else {
-          messageApi.open({
-            type: "error",
-            content: t("error"),
-            duration: 0,
-            style: { fontSize: "large" },
-          });
-          setTimeout(messageApi.destroy, 4000);
-        }
+        messageApi.open({
+          type: "error",
+          content: t("error"),
+          duration: 0,
+          style: { fontSize: "large" },
+        });
+        setTimeout(messageApi.destroy, 4000);
       });
   };
 

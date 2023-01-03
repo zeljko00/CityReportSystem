@@ -1,7 +1,6 @@
 import React from "react";
 import { SignUpForm } from "../../components/SignUpForm";
 import styled from "styled-components";
-import { LanguageSelector } from "../../components/LanguageSelector";
 import { AppFooter } from "../../layouts/AppFooter";
 import { AppHeader } from "../../layouts/AppHeader";
 import "../../assets/style/CitizenSignUp.css";
@@ -21,17 +20,13 @@ const FormContainer = styled.div`
   -webkit-backdrop-filter: blur(4px);
 `;
 
-export function CitizenSignUp() {
+export function SignUp() {
   return (
     <Page id="signup-page">
-      {" "}
       <AppHeader></AppHeader>
       <FormContainer id="form-container">
         <SignUpForm />
       </FormContainer>
-      <div className="lang-selector">
-        <LanguageSelector></LanguageSelector>
-      </div>
       <AppFooter></AppFooter>
     </Page>
   );

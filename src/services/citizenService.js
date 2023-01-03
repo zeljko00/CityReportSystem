@@ -1,9 +1,8 @@
 import axios from "axios";
-import configuration from "../environments/environmentConf.js";
 
 export function login(username, password) {
   const credentials = btoa(username + ":" + password);
-  return axios.get(configuration().baseServiceUrl + "/citizens/login", {
+  return axios.get("/CityReportSystem/login", {
     headers: {
       "Content-Type": "application/json",
       Authorization: "Basic " + credentials,
@@ -18,9 +17,9 @@ export function createCitizen(citizen) {
     lastName: citizen.lastName,
     phone: citizen.phone,
     idCard: citizen.idCard,
-    passwordHash: citizen.passwordHash,
+    password: citizen.passwordHash,
   };
-  return axios.post(configuration().baseServiceUrl + "/citizens", c, {
+  return axios.post("/CityReportSystem/signup", c, {
     headers: { "Content-Type": "application/json" },
   });
 }

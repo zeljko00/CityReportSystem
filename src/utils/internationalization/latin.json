@@ -11,7 +11,7 @@
   "loginBtn": "Uloguj se",
   "remember": "Zapamti me",
   "register": "Kreiraj nalog",
-  "guest": "Natavi kao gost",
+  "guest": "Nastavi kao gost",
   "invalidCredentials": "Nevalidni pristupni podaci",
   "firstname": "Ime",
   "lastname": "Prezime",
@@ -26,5 +26,16 @@
   "mustAcceptAgreement": "Morate prihvatiti uslove korištenja sistema!",
   "error": "Greška!",
   "forbidden": "Pristup odbijen!",
-  "passwordRule": "Lozinka mora imati više od 7 karaktera!"
+  "passwordRule": "Lozinka mora imati više od 7 karaktera!",
+  "cityMap": "Mapa grada",
+  "newReport": "Podnesi prijavu",
+  "newReportMobile": "Prijava",
+  "reportHistoryMobile": "Istorija",
+  "logoutMobile": "Odjava",
+  "reportHistory": "Istorija prijava",
+  "logout": "Odjava sa naloga",
+  "feedback": "Povratne informacije",
+  "photos": "Fotografije",
+  "details": "Detalji",
+  "intro": "Sistem  za prijavu problema je aplikacija, namijenjena građanima, čija je osnovna upotreba prijava različitih problema i nepravilnosti uočenih na teritoriji grada. Sistem omogućava jednostavno podnošenje prijave, prikaz istorije podnesenih prijava i povratnih informacija. Građanima je dostupna i interaktivna mapa sa svim aktuelnim dešavanjima na teritoriji grada."
 }

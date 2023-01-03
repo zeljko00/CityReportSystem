@@ -6,8 +6,7 @@ import { login } from "../services/citizenService.js";
 import { useNavigate } from "react-router-dom";
 import PropTypes from "prop-types";
 
-export function SignInForm(props) {
-  const { citizenLogin } = props;
+export function LogInForm() {
   const [form] = Form.useForm();
   const [user, changeUser] = useState(null);
   const [messageApi, contextHolder] = message.useMessage();
@@ -21,6 +20,9 @@ export function SignInForm(props) {
   const register = () => {
     navigate("/CityReportSystem/citizen/signup");
   };
+  const guest = () => {
+    navigate("/CityReportSystem/citizen/home");
+  };
 
   const submit = () => {
     form.validateFields().then((values) => {
@@ -28,6 +30,8 @@ export function SignInForm(props) {
         .then((result) => {
           console.log(result.data);
           changeUser(result.data);
+          sessionStorage.setItem("user", JSON.stringify(result.data));
+          navigate("/CityReportSystem/citizen/home");
           console.log(user);
         })
         .catch(() => {
@@ -94,18 +98,18 @@ export function SignInForm(props) {
           >
             {t("loginBtn")}
           </Button>
-          {citizenLogin ? (
-            <a onClick={register}>{t("register")}</a>
-          ) : (
-            <div></div>
-          )}
-          {citizenLogin ? <a id="right-a">{t("guest")}</a> : <div></div>}
+          {<a onClick={register}>{t("register")}</a>}
+          {
+            <a onClick={guest} id="right-a">
+              {t("guest")}
+            </a>
+          }
         </Form.Item>
       </Form>
     </div>
   );
 }
 
-SignInForm.propTypes = {
+LogInForm.propTypes = {
   citizenLogin: PropTypes.bool,
 };
