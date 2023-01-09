@@ -37,5 +37,17 @@
   "feedback": "Povratne informacije",
   "photos": "Fotografije",
   "details": "Detalji",
+  "serviceUnavailable": "Servis trenutno nije dostupan!",
+  "title": "Naslov",
+  "note": "Napomena",
+  "content": "Sadržaj",
+  "type": "Tip prijave",
+  "send": "Pošalji",
+  "requiredSelect": "Morate odabrati jednu od ponuđenih opcija!",
+  "locate": "Koristi lokaciju uređaja",
+  "upload": "Dodaj fotografiju",
+  "invalidFormat": "Format slike nije podržan! Pokušajte sa slikom u JPEG formatu!",
+  "coordinatesMissing": "Odaberite lokaciju!",
+  "reportSent": "Prijava uspješno podnesena!",
   "intro": "Sistem  za prijavu problema je aplikacija, namijenjena građanima, čija je osnovna upotreba prijava različitih problema i nepravilnosti uočenih na teritoriji grada. Sistem omogućava jednostavno podnošenje prijave, prikaz istorije podnesenih prijava i povratnih informacija. Građanima je dostupna i interaktivna mapa sa svim aktuelnim dešavanjima na teritoriji grada."
 }

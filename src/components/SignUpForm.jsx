@@ -3,6 +3,7 @@ import { Button, Checkbox, Form, Input, Select, message } from "antd";
 import { useTranslation } from "react-i18next";
 import agreement from "../data/Agreement.docx";
 import { createCitizen } from "../services/citizenService";
+import { useNavigate } from "react-router-dom";
 
 const { Option } = Select;
 
@@ -27,9 +28,10 @@ export function SignUpForm() {
   const { t } = useTranslation();
   const [form] = Form.useForm();
   const [messageApi, contextHolder] = message.useMessage();
+  const navigate = useNavigate();
 
   const onFinish = (values) => {
-    console.log("Received values of form: ", values);
+    console.log("Received values from form: ", values);
     createCitizen({
       firstName: values.firstname,
       lastName: values.lastname,
@@ -39,6 +41,8 @@ export function SignUpForm() {
     })
       .then((response) => {
         console.log(response.data);
+        sessionStorage.setItem("user", JSON.stringify(response.data));
+        navigate("/CityReportSystem/citizen/home");
       })
       .catch((e) => {
         messageApi.open({

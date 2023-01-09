@@ -34,10 +34,15 @@ export function LogInForm() {
           navigate("/CityReportSystem/citizen/home");
           console.log(user);
         })
-        .catch(() => {
+        .catch((result) => {
+          console.log(result.response.status);
           messageApi.open({
             type: "error",
-            content: t("invalidCredentials"),
+            content: t(
+              result.response.status === 500
+                ? "serviceUnavailable"
+                : "invalidCredentials"
+            ),
             duration: 0,
             style: { fontSize: "large" },
           });
