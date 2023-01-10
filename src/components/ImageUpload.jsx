@@ -3,7 +3,7 @@ import { PlusOutlined } from "@ant-design/icons";
 import { Modal, Upload, message } from "antd";
 import { useTranslation } from "react-i18next";
 import PropTypes from "prop-types";
-import axios from "axios";
+import { uploadImage, deleteImage } from "../services/report.service";
 
 const getBase64 = (file) =>
   new Promise((resolve, reject) => {
@@ -15,7 +15,7 @@ const getBase64 = (file) =>
 
 const ImageUpload = (props) => {
   const { t } = useTranslation();
-  const ident = props.identificator;
+  const identificator = props.identificator;
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewImage, setPreviewImage] = useState("");
   const [previewTitle, setPreviewTitle] = useState("");
@@ -34,31 +34,18 @@ const ImageUpload = (props) => {
       file.name || file.url.substring(file.url.lastIndexOf("/") + 1)
     );
   };
-  const customUploadImage = (options) => {
-    const { onSuccess, onError, file, onProgress } = options;
-
-    const fmData = new FormData();
-    const config = {
-      headers: { "content-type": "multipart/form-data" },
-      onUploadProgress: (event) => {
-        onProgress({ percent: (event.loaded / event.total) * 100 });
-      },
-    };
-    fmData.append("image", file);
-    fmData.append("identificator", ident);
-    try {
-      const res = axios
-        .post("/CityReportSystem/reports/images/upload", fmData, config)
-        .then(() => {
-          onSuccess("Ok");
-          console.log("server res: ", res);
-        });
-    } catch (err) {
-      console.log("Eroor: ", err);
-      onError({ err });
-    }
+  const upload = (options) => {
+    uploadImage(options, identificator);
   };
-  const handleChange = ({ fileList: newFileList }) => setFileList(newFileList);
+  const removeImage = (data) => {
+    console.log("removing");
+    console.log(data);
+    deleteImage(identificator + "--" + data.name);
+  };
+  const handleChange = ({ fileList: newFileList }) => {
+    setFileList(newFileList);
+    console.log("image added/deleted");
+  };
   const propss = {
     beforeUpload: (file) => {
       const isPNG = file.type === "image/jpeg";
@@ -83,7 +70,8 @@ const ImageUpload = (props) => {
         onChange={handleChange}
         {...propss}
         maxCount={4}
-        customRequest={customUploadImage}
+        customRequest={upload}
+        onRemove={removeImage}
       >
         {fileList.length >= 8 ? null : uploadButton}
       </Upload>
@@ -99,7 +87,7 @@ const ImageUpload = (props) => {
   );
 };
 ImageUpload.propTypes = {
-  identificator: PropTypes.number,
+  identificator: PropTypes.identificator,
 };
 
 export default ImageUpload;

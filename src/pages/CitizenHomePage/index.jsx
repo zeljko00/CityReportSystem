@@ -19,42 +19,151 @@ import CardMedia from "@mui/material/CardMedia";
 import Typography from "@mui/material/Typography";
 import { CitizenInfo } from "../../components/CitizenInfo";
 import { Tab, Box } from "@mui/material";
-import { Button, Form, Input, Select, message } from "antd";
+import { Button, Form, Input, Select, message, Collapse, Carousel } from "antd";
 import LocationPicker from "../../components/LocationPicker";
 import ImageUpload from "../../components/ImageUpload";
-import Accordion from "@mui/material/Accordion";
-import AccordionSummary from "@mui/material/AccordionSummary";
-import AccordionDetails from "@mui/material/AccordionDetails";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import {
   getReportTypes,
   postReport,
   getMyReports,
+  getReportStates,
 } from "../../services/report.service";
+import obj from "../../../package.json";
+const { Panel } = Collapse;
 export function CitizenHomePage() {
-  let rand = Math.floor(Math.random() * 1000000) + 1;
+  let ident = Math.floor(Math.random() * 1000000 + 1);
   const [reportTypes, changeTypes] = useState([]);
+  const [reportFilterTypes, changeFilterTypes] = useState([]);
+  const [reportStates, changeStates] = useState([]);
   const [myReports, changeMyReports] = useState([]);
-  // let user;
+  const [myFilteredReports, changeMyFilteredReports] = useState([]);
   const [messageApi, contextHolder] = message.useMessage();
+  // console.log(proxy);
+  let typeFilterValue = "";
+  let stateFilterValue = "";
+
+  const { t } = useTranslation();
+  const sortCriteria = [
+    { value: "date", label: t("date") },
+    { value: "state", label: t("state") },
+    { value: "type", label: t("type") },
+  ];
+  const sortByDate = {
+    method: (r1, r2) => {
+      const tokens1 = r1.date.split(" ");
+      const date1 = tokens1[0].split(".");
+      const time1 = tokens1[1].split(":");
+
+      const tokens2 = r2.date.split(" ");
+      const date2 = tokens2[0].split(".");
+      const time2 = tokens2[1].split(":");
+
+      const d1 = new Date(
+        date1[2],
+        date1[1] - 1,
+        date1[0],
+        time1[0],
+        time1[1],
+        time1[2]
+      );
+
+      const d2 = new Date(
+        date2[2],
+        date2[1] - 1,
+        date2[0],
+        time2[0],
+        time2[1],
+        time2[2]
+      );
+      console.log(d1.getTime() < d2.getTime());
+
+      return d1.getTime() < d2.getTime();
+    },
+  };
+  const sortByType = {
+    method: (r1, r2) => {
+      return r1.type.localeCompare(r2.type);
+    },
+  };
+  const sortByState = {
+    method: (r1, r2) => {
+      return r1.state.localeCompare(r2.state);
+    },
+  };
+  const sortDefault = {
+    method: (r1, r2) => {
+      return true;
+    },
+  };
+  const [sortFunction, changeSortFunction] = useState(sortDefault);
+  const filterFunc = () => {
+    let t = myReports;
+    if (stateFilterValue !== "all" && stateFilterValue !== "") {
+      t = t.filter((r) => {
+        return r.state === stateFilterValue;
+      });
+    } else console.log("all");
+    if (typeFilterValue !== "all" && typeFilterValue !== "") {
+      t = t.filter((r) => {
+        return r.type === typeFilterValue;
+      });
+    } else console.log("all");
+    changeMyFilteredReports(t);
+  };
+  const stateFilter = (value) => {
+    console.log(value);
+    stateFilterValue = value;
+    filterFunc();
+  };
+  const typeFilter = (value) => {
+    console.log(value);
+    typeFilterValue = value;
+    filterFunc();
+  };
+  const sortFunc = (value) => {
+    if (value === "date") {
+      console.log("sort by date");
+      changeSortFunction(sortByDate);
+    } else if (value === "type") {
+      console.log("sort by type");
+      changeSortFunction(sortByType);
+    } else {
+      console.log("sort by state");
+      changeSortFunction(sortByState);
+    }
+  };
   useEffect(() => {
-    // user = JSON.parse(sessionStorage.getItem("user"));
     getReportTypes()
       .then((response) => {
         const types = response.data.map((type) => {
           return {
             value: type,
-            label: type,
+            label: t(type),
           };
         });
-        console.log(response.data);
         changeTypes(types);
+        const temp = types;
+        temp.push({ value: "all", label: t("all") });
+        changeFilterTypes(temp);
+      })
+      .catch();
+    getReportStates()
+      .then((response) => {
+        const states = response.data.map((type) => {
+          return {
+            value: type,
+            label: t(type),
+          };
+        });
+        states.push({ value: "all", label: t("all") });
+        changeStates(states);
       })
       .catch();
     getMyReports(JSON.parse(sessionStorage.getItem("user")).id)
       .then((response) => {
         sessionStorage.setItem("myReports", JSON.stringify(response.data));
         changeMyReports(response.data);
+        changeMyFilteredReports(response.data);
       })
       .catch();
   }, []);
@@ -64,13 +173,11 @@ export function CitizenHomePage() {
   const [form] = Form.useForm();
   const [value, setValue] = React.useState("0");
 
-  const { t } = useTranslation();
   const navigate = useNavigate();
   // to enable collecting data from child component we use callback function
   let position = null;
   const changePosition = (pos) => {
     position = pos;
-    console.log("Position changed: " + position);
   };
 
   const handleChange = (event, newValue) => {
@@ -84,13 +191,6 @@ export function CitizenHomePage() {
   console.log(u);
 
   const submit = () => {
-    messageApi.open({
-      type: "success",
-      content: "clicked submit",
-      duration: 0,
-      style: { fontSize: "large" },
-    });
-    setTimeout(messageApi.destroy, 2000);
     form.validateFields().then((values) => {
       if (position === null) {
         messageApi.open({
@@ -99,7 +199,6 @@ export function CitizenHomePage() {
           duration: 0,
           style: { fontSize: "large" },
         });
-        setTimeout(messageApi.destroy, 4000);
       } else {
         let user;
         if (sessionStorage.getItem("user") !== null) {
@@ -107,7 +206,7 @@ export function CitizenHomePage() {
           console.log(user);
         } else user = -1;
         const reportRequest = {
-          id: rand,
+          id: ident,
           title: values.title,
           note: values.note,
           content: values.content,
@@ -117,9 +216,10 @@ export function CitizenHomePage() {
           creator: user,
         };
         postReport(reportRequest)
-          .then(() => {
+          .then((response) => {
+            ident = Math.floor(Math.random() * 1000000 + 1);
             form.resetFields();
-            rand = Math.floor(Math.random() * 1000000) + 1;
+            myReports.push(response.data);
             messageApi.open({
               type: "success",
               content: t("reportSent"),
@@ -140,6 +240,17 @@ export function CitizenHomePage() {
       }
     });
   };
+
+  const contentStyle = {
+    margin: "auto",
+    height: "370px",
+    color: "#fff",
+    lineHeight: "260px",
+    textAlign: "center",
+    background: "#364d79",
+    maxWidth: "100%",
+  };
+  const onChange = (currentSlide) => {};
 
   return (
     <div className="citizen-home-page">
@@ -240,7 +351,7 @@ export function CitizenHomePage() {
                   <LocationPicker callback={changePosition}></LocationPicker>
                 </Form.Item>
                 <Form.Item>
-                  <ImageUpload identificator={rand}></ImageUpload>
+                  <ImageUpload identificator={ident}></ImageUpload>
                 </Form.Item>
                 <Form.Item>
                   <Button
@@ -262,24 +373,101 @@ export function CitizenHomePage() {
             </div>
           </TabPanel>
           <TabPanel value="3">
-            {myReports &&
-              myReports.map((report) => {
-                console.log("hit");
-                return (
-                  <Accordion key={report.id}>
-                    <AccordionSummary
-                      expandIcon={<ExpandMoreIcon />}
-                      aria-controls="panel1a-content"
-                      id="panel1a-header"
-                    >
-                      <Typography>Vrijeme&nbspTip</Typography>
-                    </AccordionSummary>
-                    <AccordionDetails>
-                      <Typography>report.title</Typography>
-                    </AccordionDetails>
-                  </Accordion>
-                );
-              })}
+            <div className="wrapper">
+              <div className="filter-sort-div">
+                <Select
+                  onChange={typeFilter}
+                  placeholder={t("typeFilter")}
+                  optionFilterProp="children"
+                  style={{ fontSize: "18px" }}
+                  size="large"
+                  options={reportFilterTypes}
+                  className="filter-sort-select"
+                />
+                <Select
+                  onChange={stateFilter}
+                  placeholder={t("stateFilter")}
+                  optionFilterProp="children"
+                  style={{ fontSize: "18px" }}
+                  size="large"
+                  options={reportStates}
+                  className="filter-sort-select"
+                />
+                <Select
+                  onChange={sortFunc}
+                  placeholder={t("sort")}
+                  optionFilterProp="children"
+                  style={{ fontSize: "18px" }}
+                  size="large"
+                  options={sortCriteria}
+                  className="filter-sort-select"
+                />
+              </div>
+              <div className="report-history-container">
+                <Collapse accordion>
+                  {console.log(sortFunction.method)}
+                  {myFilteredReports &&
+                    myFilteredReports
+                      .sort(sortFunction.method)
+                      .map((report) => {
+                        return (
+                          <Panel
+                            header={
+                              <span className="reportHeader">
+                                <span className="left-span header-span">
+                                  {report.title}
+                                </span>
+                                <span className="center-span header-span">
+                                  {t("reportType")}&nbsp;&nbsp;&nbsp;
+                                  {t(report.type)}
+                                </span>
+                                <span className="header-span">
+                                  {t("reportCreationTime")}&nbsp;&nbsp;&nbsp;
+                                  {report.date}
+                                </span>
+                                <span className="right-span header-span">
+                                  {t(report.state)}
+                                </span>
+                              </span>
+                            }
+                            key={report.id}
+                            className="reportInfo"
+                          >
+                            <p>
+                              {t("content") + ": "}
+                              <br />
+                              {report.content}
+                            </p>
+                            <p>
+                              {t("note") + ": "}
+                              <br />
+                              {report.note}
+                            </p>
+                            <div className="galery-container">
+                              <Carousel afterChange={onChange}>
+                                {report.images &&
+                                  report.images.map((img) => {
+                                    return (
+                                      <div key={img.id}>
+                                        <img
+                                          src={
+                                            obj.proxy +
+                                            "/CityReportSystem/reports/images/" +
+                                            img.id
+                                          }
+                                          style={contentStyle}
+                                        ></img>
+                                      </div>
+                                    );
+                                  })}
+                              </Carousel>
+                            </div>
+                          </Panel>
+                        );
+                      })}
+                </Collapse>
+              </div>
+            </div>
           </TabPanel>
         </TabContext>
       </div>

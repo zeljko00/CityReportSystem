@@ -184,12 +184,13 @@ function CityMap() {
 }
 function addMarkers(title, desc, info, date, x, y, type, creator, images, t) {
   const contentStyle = {
-    margin: 0,
-    height: "160px",
+    margin: "auto",
+    height: "270px",
     color: "#fff",
-    lineHeight: "160px",
+    lineHeight: "260px",
     textAlign: "center",
     background: "#364d79",
+    maxWidth: "100%",
   };
   const onChange = (currentSlide) => {
     console.log(currentSlide);
