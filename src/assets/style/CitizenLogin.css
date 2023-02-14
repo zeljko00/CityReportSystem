@@ -2,9 +2,9 @@
     background-repeat: no-repeat;
     background-size: cover;
     position: relative;
-    
+    min-height: 100vh;
 }
-@media only screen  and (max-device-width: 1100px)
+@media only screen  and (max-device-width: 600px)
  {
     .login-page {
         background-image: url("../images/phone.jpg");
@@ -12,8 +12,17 @@
     .login-form-container {
         background-color: rgba(255, 252, 252, 0.19);
     }
+    .gray-text{
+        color: rgb(174, 186, 199)
+    }
+    footer{
+        position: absolute;
+        bottom: 0px;
+        left: 0px;
+        right: 0px;
+    }
  }
-@media only screen  and (min-device-width: 1100px)
+@media only screen  and (min-device-width: 600px)
  {   .login-page{
     background-image: url("../images/6.jpg");
     }
@@ -27,10 +36,11 @@
 }
 .login-form-container {
     margin: auto;
-    padding: 50px 20px 50px 20px;
-    width: 370px;
+    padding: 50px 20px 21px 20px;
+    width: calc( 90% - 40px );
+    max-width: 300px;
     margin-top: 20vh;
-    margin-bottom: 30vh;
+    margin-bottom: 17vh;
     border-radius: 16px;
     box-shadow: 10 40px 30px rgba(255, 255, 255, 0.1);
     backdrop-filter: blur(5px);
@@ -40,5 +50,6 @@
     float: right;
 }
 a {
-    font-size: 18px;
+    font-size: 16px;
 }
+

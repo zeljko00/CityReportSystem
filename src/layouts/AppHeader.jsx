@@ -8,7 +8,7 @@ export function AppHeader() {
   return (
     <div className="header">
       <div className="amblem">
-        <img className="amblem_image" src={amblem} alt="grb Banjaluke"></img>
+        <img className="amblem-image" src={amblem} alt="grb Banjaluke"></img>
       </div>
       <div className="title">
         <b>

@@ -1,27 +1,34 @@
 import React, { useEffect, useState } from "react";
-import { AppHeader } from "../../layouts/AppHeader";
-import { AppFooter } from "../../layouts/AppFooter";
-import CityMap from "../../components/CityMap";
+import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+
 import { TabPanel, TabList, TabContext } from "@mui/lab";
 import BottomNavigation from "@mui/material/BottomNavigation";
 import BottomNavigationAction from "@mui/material/BottomNavigationAction";
-import { LanguageSelector } from "../../components/LanguageSelector";
 import HistoryIcon from "@mui/icons-material/History";
 import PostAddIcon from "@mui/icons-material/PostAdd";
 import MapIcon from "@mui/icons-material/Map";
 import LogoutIcon from "@mui/icons-material/Logout";
-import "../../assets/style/CitizenHomePage.css";
-import { useNavigate } from "react-router-dom";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import CardMedia from "@mui/material/CardMedia";
 import Typography from "@mui/material/Typography";
-import { CitizenInfo } from "../../components/CitizenInfo";
 import { Tab, Box } from "@mui/material";
+import Badge from "@mui/material/Badge";
+import MailIcon from "@mui/icons-material/Mail";
+
 import { Button, Form, Input, Select, message, Collapse, Carousel } from "antd";
+
+import { LanguageSelector } from "../../components/LanguageSelector";
+import CityMap from "../../components/CityMap";
+// import { CitizenInfo } from "../../components/CitizenInfo";
 import LocationPicker from "../../components/LocationPicker";
 import ImageUpload from "../../components/ImageUpload";
+import { AppHeader } from "../../layouts/AppHeader";
+import { AppFooter } from "../../layouts/AppFooter";
+
+import "../../assets/style/CitizenHomePage.css";
+
 import {
   getReportTypes,
   postReport,
@@ -29,25 +36,36 @@ import {
   getReportStates,
 } from "../../services/report.service";
 import obj from "../../../package.json";
+import { ReportAdditionalInfoForm } from "../../components/ReportAdditionalInfoForm";
+
 const { Panel } = Collapse;
 export function CitizenHomePage() {
-  let ident = Math.floor(Math.random() * 1000000 + 1);
+  let ident = Math.floor(Math.random() * 1000000 + 1); // used add key when uploading report images
   const [reportTypes, changeTypes] = useState([]);
-  const [reportFilterTypes, changeFilterTypes] = useState([]);
+  const [reportFilterTypes, changeFilterTypes] = useState([]); // used for filtering my reports
   const [reportStates, changeStates] = useState([]);
   const [myReports, changeMyReports] = useState([]);
   const [myFilteredReports, changeMyFilteredReports] = useState([]);
   const [messageApi, contextHolder] = message.useMessage();
-  // console.log(proxy);
-  let typeFilterValue = "";
-  let stateFilterValue = "";
+  // eslint-disable-next-line no-unused-vars
+  const [changed, changeChanged] = useState(false);
+
+  const [typeFilterValue, changeTypeFilterValue] = useState("");
+  const [stateFilterValue, changeStateFilterValue] = useState("");
+
+  const [guest, changeGuest] = useState(true);
+  let user;
+
+  let counter = 1;
 
   const { t } = useTranslation();
+
   const sortCriteria = [
     { value: "date", label: t("date") },
     { value: "state", label: t("state") },
     { value: "type", label: t("type") },
   ];
+
   const sortByDate = {
     method: (r1, r2) => {
       const tokens1 = r1.date.split(" ");
@@ -96,30 +114,33 @@ export function CitizenHomePage() {
     },
   };
   const [sortFunction, changeSortFunction] = useState(sortDefault);
-  const filterFunc = () => {
+
+  const filterFunc = (state, type) => {
+    console.log("state: " + state + "   " + "type: " + type);
     let t = myReports;
-    if (stateFilterValue !== "all" && stateFilterValue !== "") {
+    if (state !== "all" && state !== "") {
       t = t.filter((r) => {
-        return r.state === stateFilterValue;
+        return r.state === state;
       });
     } else console.log("all");
-    if (typeFilterValue !== "all" && typeFilterValue !== "") {
+    if (type !== "all" && type !== "") {
       t = t.filter((r) => {
-        return r.type === typeFilterValue;
+        return r.type === type;
       });
     } else console.log("all");
     changeMyFilteredReports(t);
   };
   const stateFilter = (value) => {
     console.log(value);
-    stateFilterValue = value;
-    filterFunc();
+    changeStateFilterValue(value);
+    filterFunc(value, typeFilterValue);
   };
   const typeFilter = (value) => {
     console.log(value);
-    typeFilterValue = value;
-    filterFunc();
+    changeTypeFilterValue(value);
+    filterFunc(stateFilterValue, value);
   };
+
   const sortFunc = (value) => {
     if (value === "date") {
       console.log("sort by date");
@@ -133,45 +154,62 @@ export function CitizenHomePage() {
     }
   };
   useEffect(() => {
-    getReportTypes()
-      .then((response) => {
-        const types = response.data.map((type) => {
-          return {
-            value: type,
-            label: t(type),
-          };
-        });
-        changeTypes(types);
-        const temp = types;
-        temp.push({ value: "all", label: t("all") });
-        changeFilterTypes(temp);
-      })
-      .catch();
-    getReportStates()
-      .then((response) => {
-        const states = response.data.map((type) => {
-          return {
-            value: type,
-            label: t(type),
-          };
-        });
-        states.push({ value: "all", label: t("all") });
-        changeStates(states);
-      })
-      .catch();
-    getMyReports(JSON.parse(sessionStorage.getItem("user")).id)
-      .then((response) => {
-        sessionStorage.setItem("myReports", JSON.stringify(response.data));
-        changeMyReports(response.data);
-        changeMyFilteredReports(response.data);
-      })
-      .catch();
+    if (sessionStorage.getItem("tab") !== null) {
+      console.log("saved tab: " + sessionStorage.getItem("tab"));
+      handleChange(null, sessionStorage.getItem("tab"));
+    }
+    counter = 1;
+    if (JSON.parse(sessionStorage.getItem("user")) !== null) {
+      changeGuest(false);
+      user = JSON.parse(sessionStorage.getItem("user"));
+
+      getReportTypes()
+        .then((response) => {
+          const types = response.data.map((type) => {
+            return {
+              value: type,
+              label: t(type),
+            };
+          });
+          changeTypes(types);
+
+          // report types for filtering (added 'all')
+          const temp = [];
+          types.forEach((t) => {
+            temp.push(t);
+          });
+          temp.push({ value: "all", label: t("all") });
+          changeFilterTypes(temp);
+        })
+        .catch();
+      getReportStates()
+        .then((response) => {
+          const states = response.data.map((type) => {
+            return {
+              value: type,
+              label: t(type),
+            };
+          });
+          states.push({ value: "all", label: t("all") });
+          changeStates(states);
+        })
+        .catch();
+
+      console.log("fetching my reports");
+      getMyReports(user.user.id)
+        .then((response) => {
+          sessionStorage.setItem("myReports", JSON.stringify(response.data));
+          changeMyReports(response.data);
+          changeMyFilteredReports(response.data);
+        })
+        .catch();
+    }
   }, []);
 
   const { TextArea } = Input;
 
   const [form] = Form.useForm();
-  const [value, setValue] = React.useState("0");
+  const [value, setValue] = useState("0");
 
   const navigate = useNavigate();
   // to enable collecting data from child component we use callback function
@@ -181,14 +219,16 @@ export function CitizenHomePage() {
   };
 
   const handleChange = (event, newValue) => {
+    console.log("handling " + newValue);
     if (newValue === "-1") {
-      sessionStorage.removeItem("user");
+      sessionStorage.clear();
       navigate("/CityReportSystem/login");
-    } else setValue(newValue);
+    } else if (newValue !== undefined) {
+      console.log("saving tab: " + newValue);
+      sessionStorage.setItem("tab", newValue);
+      setValue(newValue);
+    }
   };
-
-  const u = JSON.parse(sessionStorage.getItem("user"));
-  console.log(u);
 
   const submit = () => {
     form.validateFields().then((values) => {
@@ -197,14 +237,18 @@ export function CitizenHomePage() {
           type: "error",
           content: t("coordinatesMissing"),
           duration: 0,
-          style: { fontSize: "large" },
         });
+        setTimeout(messageApi.destroy, 3000);
       } else {
         let user;
         if (sessionStorage.getItem("user") !== null) {
-          user = JSON.parse(sessionStorage.getItem("user")).id;
+          console.log("not guest");
+          user = JSON.parse(sessionStorage.getItem("user")).user.id;
           console.log(user);
-        } else user = -1;
+        } else {
+          console.log("guest");
+          user = -1;
+        }
         const reportRequest = {
           id: ident,
           title: values.title,
@@ -224,7 +268,6 @@ export function CitizenHomePage() {
               type: "success",
               content: t("reportSent"),
               duration: 0,
-              style: { fontSize: "large" },
             });
             setTimeout(messageApi.destroy, 4000);
           })
@@ -233,14 +276,21 @@ export function CitizenHomePage() {
               type: "error",
               content: error,
               duration: 0,
-              style: { fontSize: "large" },
             });
-            setTimeout(messageApi.destroy, 4000);
+            setTimeout(messageApi.destroy, 3000);
           });
       }
     });
   };
-
+  const signal = () => {
+    console.log("changing!");
+    messageApi.open({
+      type: "success",
+      content: t("successfulProvidingInfo"),
+      duration: 0,
+    });
+    setTimeout(messageApi.destroy, 3000);
+  };
   const contentStyle = {
     margin: "auto",
     height: "370px",
@@ -257,24 +307,36 @@ export function CitizenHomePage() {
       {contextHolder}
       <AppHeader></AppHeader>
 
-      {u && (
+      {/* {u && (
         <CitizenInfo
           firstname={u.firstName}
           lastname={u.lastName}
         ></CitizenInfo>
-      )}
+      )} */}
       <div id="tab-menu">
         <TabContext value={value}>
           <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
-            <TabList onChange={handleChange} centered>
+            <TabList onChange={handleChange} value={value} centered>
               <Tab label={t("cityMap")} value="1" icon={<MapIcon />} />
-              <Tab label={t("newReport")} value="2" icon={<PostAddIcon />} />
+              <Tab
+                label={t("newReport")}
+                value="2"
+                icon={<PostAddIcon />}
+                disabled={guest}
+              />
               <Tab
                 label={t("reportHistory")}
                 value="3"
                 icon={<HistoryIcon />}
+                disabled={guest}
               />
-              <Tab label={t("logout")} icon={<LogoutIcon />} value="-1"></Tab>
+              <Tab
+                label={t("logout")}
+                icon={<LogoutIcon />}
+                value="-1"
+                disabled={guest}
+              ></Tab>
+              <Tab style={{ display: "none" }} value="0"></Tab>
             </TabList>
           </Box>
           <TabPanel value="0">
@@ -405,7 +467,6 @@ export function CitizenHomePage() {
               </div>
               <div className="report-history-container">
                 <Collapse accordion>
-                  {console.log(sortFunction.method)}
                   {myFilteredReports &&
                     myFilteredReports
                       .sort(sortFunction.method)
@@ -414,19 +475,28 @@ export function CitizenHomePage() {
                           <Panel
                             header={
                               <span className="reportHeader">
-                                <span className="left-span header-span">
-                                  {report.title}
+                                <span className="title-span">
+                                  {counter++}.&nbsp;&nbsp;&nbsp;{report.title}
                                 </span>
-                                <span className="center-span header-span">
+                                <span className="type-span">
                                   {t("reportType")}&nbsp;&nbsp;&nbsp;
                                   {t(report.type)}
                                 </span>
-                                <span className="header-span">
+                                <span className="time-span">
                                   {t("reportCreationTime")}&nbsp;&nbsp;&nbsp;
                                   {report.date}
                                 </span>
-                                <span className="right-span header-span">
+                                <span className="state-span">
                                   {t(report.state)}
+
+                                  {report.requiredInfo && (
+                                    <span>
+                                      &nbsp;&nbsp;&nbsp;&nbsp;
+                                      <Badge badgeContent={1} color="primary">
+                                        <MailIcon color="action" />
+                                      </Badge>
+                                    </span>
+                                  )}
                                 </span>
                               </span>
                             }
@@ -434,15 +504,47 @@ export function CitizenHomePage() {
                             className="reportInfo"
                           >
                             <p>
-                              {t("content") + ": "}
+                              <span className="title-span-extended">
+                                {t("content") + ": "}
+                              </span>
                               <br />
                               {report.content}
                             </p>
                             <p>
-                              {t("note") + ": "}
+                              <span className="title-span-extended">
+                                {t("note") + ": "}
+                              </span>
                               <br />
-                              {report.note}
+                              {report.note !== null && report.note !== ""
+                                ? report.note
+                                : "-"}
                             </p>
+                            {report.providedAdditionalInfo !== null &&
+                              report.providedAdditionalInfo !== "" && (
+                                <p>
+                                  <span className="title-span-extended">
+                                    {t("additionalInfo") + ": "}
+                                  </span>
+                                  <br />
+                                  {report.providedAdditionalInfo}
+                                </p>
+                              )}
+                            {report.requiredInfo && (
+                              <p>
+                                <span className="title-span-extended">
+                                  {t("requiredInfo") + ": "}
+                                </span>
+                                <br />
+                                <b>{report.requiredAdditionalInfo}</b>
+                              </p>
+                            )}
+                            {report.requiredInfo && (
+                              <ReportAdditionalInfoForm
+                                report={report.id}
+                                func={signal}
+                              ></ReportAdditionalInfoForm>
+                            )}
+
                             <div className="galery-container">
                               <Carousel afterChange={onChange}>
                                 {report.images &&
@@ -476,7 +578,7 @@ export function CitizenHomePage() {
       </div>
 
       <div id="bottom-menu">
-        <Box centered>
+        <Box sx={{ centered: true }}>
           <BottomNavigation showLabels value={value} onChange={handleChange}>
             <BottomNavigationAction
               label={t("cityMap")}
@@ -487,16 +589,19 @@ export function CitizenHomePage() {
               label={t("newReportMobile")}
               value="2"
               icon={<PostAddIcon />}
+              disabled={guest}
             />
             <BottomNavigationAction
               label={t("reportHistoryMobile")}
               value="3"
               icon={<HistoryIcon />}
+              disabled={guest}
             />
             <BottomNavigationAction
               label={t("logoutMobile")}
               value="-1"
               icon={<LogoutIcon />}
+              disabled={guest}
             />
           </BottomNavigation>
         </Box>

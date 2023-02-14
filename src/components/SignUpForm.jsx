@@ -9,17 +9,17 @@ const { Option } = Select;
 
 const formItemLayout = {
   labelCol: {
-    sm: { span: 9 },
+    sm: { span: 10 },
   },
   wrapperCol: {
-    sm: { span: 15 },
+    sm: { span: 14 },
   },
 };
 const tailFormItemLayout = {
   wrapperCol: {
     sm: {
-      span: 15,
-      offset: 9,
+      span: 14,
+      offset: 10,
     },
   },
 };
@@ -57,7 +57,7 @@ export function SignUpForm() {
 
   const prefixSelector = (
     <Form.Item name="prefix" noStyle>
-      <Select style={{ width: 90 }}>
+      <Select style={{ minWidth: 70 }}>
         <Option value="+387">+387</Option>
         <Option value="+381">+381</Option>
       </Select>

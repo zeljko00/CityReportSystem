@@ -3,28 +3,41 @@
     display: flex;
     flex-direction: row;
   }
-  
+
   .amblem {
     justify-content: center;
   }
   
-  .amblem_image {
-    height: 21vmin;
+  .amblem-image {
+    width: 20vmin;
   }
   
   .title {
     text-align: center;
-    color: rgb(12, 12, 12);
+   
     font-family: 'Segoe UI','Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', 'Arial', 'Sans-Serif';
     padding-top: 2.2vh;
-    width: calc(100vw - 20vmin - 5vmin);
+    width: calc(100vw - 20vmin - 2% );
     font-size: calc(2.5vw + 5px);
     letter-spacing: 0.25vw;
     word-spacing: 1.1vw;
 
   
   }
-  @media only screen  and (max-device-width: 1100px)
+  @media only screen  and (min-device-width: 600px)
+ {
+    .title {
+      color: #1677ff;
+      margin-right: 20vmin;
+    }
+ }
+ @media only screen  and (max-device-width: 600px)
+ {
+    .title {
+      color: rgb(174, 186, 199);
+    }
+ }
+  /* @media only screen  and (max-device-width: 1100px)
  {
     .title {
       background: linear-gradient(
@@ -46,5 +59,5 @@
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
-}
+} */
   

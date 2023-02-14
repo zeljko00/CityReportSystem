@@ -19,6 +19,11 @@ export function postReport(report) {
     headers: { "Content-Type": "application/json" },
   });
 }
+export function provideInfo(report, info) {
+  return axios.put("/CityReportSystem/reports/additionalInfo/" + report, info, {
+    headers: { "Content-Type": "application/json" },
+  });
+}
 
 export function getMyReports(id) {
   return axios.get("/CityReportSystem/reports/author/" + id, {
@@ -55,7 +60,7 @@ export function uploadImage(image, id) {
         onSuccess("Ok");
       });
   } catch (err) {
-    console.log("Eroor: ", err);
+    console.log("Error: ", err);
     onError({ err });
   }
 }

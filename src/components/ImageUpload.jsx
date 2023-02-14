@@ -87,7 +87,7 @@ const ImageUpload = (props) => {
   );
 };
 ImageUpload.propTypes = {
-  identificator: PropTypes.identificator,
+  identificator: PropTypes.number,
 };
 
 export default ImageUpload;

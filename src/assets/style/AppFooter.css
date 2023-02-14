@@ -1,13 +1,30 @@
 .footer {
-    text-align: center;
+    display: flex;
+    flex-direction: row;
     padding: 1% 1% 1% 1%;
-    color: rgb(120, 127, 134);
-    font-size: calc(4px + 2vmin);
+    font-size: calc(8px + 1vmin);
   }
   .lang-selector{
-    /* position: fixed;
-    bottom: 30px;
-    left: 30px; */
-    width: 50px;
+    width: 40px;
     margin-left: 20px;
 }
+.signature-div{
+  margin-right: 60px;
+  flex-grow: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@media only screen  and (max-device-width: 600px)
+ {
+  .footer{
+    color: rgb(174, 186, 199);
+  }
+ }
+ @media only screen  and (min-device-width: 600px)
+ {
+  .footer{
+    color: rgb(115, 120, 125);
+  }
+ }

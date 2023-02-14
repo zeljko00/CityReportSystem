@@ -6,7 +6,7 @@ import { login } from "../services/citizenService.js";
 import { useNavigate } from "react-router-dom";
 import PropTypes from "prop-types";
 
-export function LogInForm() {
+export function LogInForm(props) {
   const [form] = Form.useForm();
   const [user, changeUser] = useState(null);
   const [messageApi, contextHolder] = message.useMessage();
@@ -14,7 +14,7 @@ export function LogInForm() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    console.log(user);
+    console.log("current user: " + user);
   }, [user]);
 
   const register = () => {
@@ -28,14 +28,17 @@ export function LogInForm() {
     form.validateFields().then((values) => {
       login(values.username, values.password)
         .then((result) => {
-          console.log(result.data);
+          // successful login - changing current user
+          console.log("fetched user data: " + result.data);
           changeUser(result.data);
           sessionStorage.setItem("user", JSON.stringify(result.data));
-          navigate("/CityReportSystem/citizen/home");
-          console.log(user);
+          if (result.data.user.role === "CITIZEN")
+            navigate("/CityReportSystem/citizen/home");
+          else props.func();
         })
         .catch((result) => {
           console.log(result.response.status);
+          // info message (feedback)
           messageApi.open({
             type: "error",
             content: t(
@@ -44,9 +47,8 @@ export function LogInForm() {
                 : "invalidCredentials"
             ),
             duration: 0,
-            style: { fontSize: "large" },
           });
-          setTimeout(messageApi.destroy, 4000);
+          setTimeout(messageApi.destroy, 3000);
         });
     });
   };
@@ -68,7 +70,6 @@ export function LogInForm() {
           <Input
             prefix={<UserOutlined className="site-form-item-icon" />}
             placeholder={t("username")}
-            style={{ fontSize: "18px" }}
           />
         </Form.Item>
 
@@ -80,32 +81,30 @@ export function LogInForm() {
             prefix={<LockOutlined className="site-form-item-icon" />}
             type="password"
             placeholder={t("password")}
-            style={{ fontSize: "18px" }}
           />
         </Form.Item>
 
         <Form.Item name="remember" valuePropName="checked">
-          <Checkbox style={{ fontSize: "17px" }}>{t("remember")}</Checkbox>
+          <Checkbox className="gray-text">{t("remember")}</Checkbox>
         </Form.Item>
 
         <Form.Item>
           <Button
             type="primary"
             htmlType="submit"
-            className="login-form-button"
+            className="login-form-button gray-text"
             onClick={() => submit()}
             id="login-btn"
-            style={{
-              fontSize: "20px",
-              lineHeight: "20px",
-              margin: "0 0 10px 0",
-            }}
           >
             {t("loginBtn")}
           </Button>
-          {<a onClick={register}>{t("register")}</a>}
           {
-            <a onClick={guest} id="right-a">
+            <a className="gray-text" onClick={register}>
+              {t("register")}
+            </a>
+          }
+          {
+            <a className="gray-text" onClick={guest} id="right-a">
               {t("guest")}
             </a>
           }
@@ -117,4 +116,5 @@ export function LogInForm() {
 
 LogInForm.propTypes = {
   citizenLogin: PropTypes.bool,
+  func: PropTypes.func,
 };

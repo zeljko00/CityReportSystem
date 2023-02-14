@@ -161,7 +161,7 @@ function LocationPicker(props) {
 }
 
 LocationPicker.propTypes = {
-  callback: PropTypes.function,
+  callback: PropTypes.func,
 };
 
 export default LocationPicker;

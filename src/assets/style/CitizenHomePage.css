@@ -1,4 +1,4 @@
-@media only screen  and (min-device-width: 1100px)
+@media only screen  and (min-device-width: 600px)
  {  
     #bottom-menu{
         display: none;
@@ -9,7 +9,8 @@
     .mapArea {
         margin: auto;
         width: 98%;
-        height: 90vh;
+        height: 85vh;
+        margin-bottom: 50px;
       }
       .MuiPaper-root {
         text-align: justify;
@@ -37,6 +38,23 @@
     .report-container {
         width: 38%;
     }
+    .title-span{
+        width: calc( 200% / 5 );
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    .type-span{
+        width: calc( 100% / 5 );
+    }
+    .time-span{
+        width: calc( 100% / 5 );
+        text-align: right;
+    }
+    .state-span{
+        width: calc( 100% / 5 );
+        text-align: right;
+    }
     .left-span{
         overflow: hidden;
         text-overflow: ellipsis;
@@ -46,14 +64,15 @@
       }
       
       .header-span {
-          width: calc( 100% / 4 );
+          min-width: calc( 100% / 4 );
           display:inline-block
       }
       .report-history-container{
         width: 88vw;
+        
     }
 }
-@media only screen  and (max-device-width: 1100px)
+@media only screen  and (max-device-width: 600px)
  {  
     .css-1gsv261{
         display: none;
@@ -68,13 +87,14 @@
     #lng-select{
         position: absolute;
         top: 65px;
-        right: 20px;
+        right: 10px;
         display: flex;
+        color:rgb(174, 186, 199);
     }
     .mapArea {
         margin: auto;
         width: 98%;
-        height: calc( 100vh - 100px );
+        height: 76vh;
       }
       .MuiPaper-root {
         text-align: center;
@@ -108,7 +128,9 @@
         width: 95vw;
     }
 }
-
+.report-history-container{
+    min-height: 80vh;
+}
   .leaflet-container {
     height: 100%;
     width: 100%;
@@ -134,10 +156,6 @@
    justify-content: center;
    padding: 10px !important;
 }
-.mapArea {
-    margin-bottom: 50px;
-    height: 70vh;
-}
 .reportInfo{
     overflow:hidden;
     background-color: #f7f7f7;
@@ -158,4 +176,14 @@
 }
 .ant-select{
     min-width: 220px;
+}
+.title-span-extended{
+    font-size: 13px;
+    font-weight: 600;
+}
+.citizen-home-page{
+    background-image: linear-gradient( to bottom, #fdfbfb,    #d0dbe0 );
+}
+#hidden-tab{
+    display: none;
 }

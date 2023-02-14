@@ -74,5 +74,11 @@
   "stateFilter": "Filter - stanje prijave",
   "sort": "Sortiraj",
   "all": "sve",
-  "intro": "Sistem  za prijavu problema je aplikacija, namijenjena građanima, čija je osnovna upotreba prijava različitih problema i nepravilnosti uočenih na teritoriji grada. Sistem omogućava jednostavno podnošenje prijave, prikaz istorije podnesenih prijava i povratnih informacija. Građanima je dostupna i interaktivna mapa sa svim aktuelnim dešavanjima na teritoriji grada."
+  "intro": "Sistem  za prijavu problema je aplikacija koja je namijenjena građanima i čija je osnovna svrha prijava različitih problema i nepravilnosti uočenih na teritoriji grada. Sistem omogućava jednostavno podnošenje prijave, prikaz istorije podnesenih prijava i povratnih informacija. Korisnicima je dostupna i interaktivna mapa sa svim aktuelnim dešavanjima na teritoriji grada.",
+  "additionalInfo": "Dodatne informacije",
+  "requiredInfo": "Zahtijevane informacije",
+  "successfulProvidingInfo": "Podaci su poslati!",
+  "admin": "Administrator",
+  "citizen": "Građanin",
+  "pickAcc": "Odaberite nalog"
 }

@@ -1,5 +1,6 @@
 import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
+// files with translations for specific languages
 import latin from "./latin.json";
 import cyrillic from "./cyrillic.json";
 
@@ -15,12 +16,11 @@ const initializeI18N = () => {
         translation: cyrillic,
       },
     },
+    // trying to obtain previously used langugage, which is stored in local storage
     lng: localStorage.getItem("language"),
+    // if language specified as lng value can not be found, fallbackLng will bi used
     fallbackLng: "latin",
   });
-
-  // debug
-  console.log("i18n initialized!");
 };
 
 export default initializeI18N;

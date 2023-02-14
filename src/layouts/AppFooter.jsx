@@ -6,11 +6,10 @@ export function AppFooter() {
   const { t } = useTranslation();
   return (
     <div className="footer">
-      {" "}
       <div className="lang-selector">
         <LanguageSelector></LanguageSelector>
       </div>
-      {t("signature")}
+      <div className="signature-div">{t("signature")}</div>
     </div>
   );
 }
