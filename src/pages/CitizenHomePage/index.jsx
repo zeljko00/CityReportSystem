@@ -16,6 +16,7 @@ import Typography from "@mui/material/Typography";
 import { Tab, Box } from "@mui/material";
 import Badge from "@mui/material/Badge";
 import MailIcon from "@mui/icons-material/Mail";
+import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 
 import { Button, Form, Input, Select, message, Collapse, Carousel } from "antd";
 
@@ -54,7 +55,7 @@ export function CitizenHomePage() {
   const [stateFilterValue, changeStateFilterValue] = useState("");
 
   const [guest, changeGuest] = useState(true);
-  let user;
+  const [user, changeUser] = useState(null);
 
   let counter = 1;
 
@@ -161,8 +162,10 @@ export function CitizenHomePage() {
     counter = 1;
     if (JSON.parse(sessionStorage.getItem("user")) !== null) {
       changeGuest(false);
-      user = JSON.parse(sessionStorage.getItem("user"));
-
+      const temp = JSON.parse(sessionStorage.getItem("user"));
+      changeUser(temp);
+      console.log("switched user to ");
+      console.log(temp);
       getReportTypes()
         .then((response) => {
           const types = response.data.map((type) => {
@@ -196,7 +199,7 @@ export function CitizenHomePage() {
         .catch();
 
       console.log("fetching my reports");
-      getMyReports(user.user.id)
+      getMyReports(temp.user.id)
         .then((response) => {
           sessionStorage.setItem("myReports", JSON.stringify(response.data));
           changeMyReports(response.data);
@@ -303,312 +306,316 @@ export function CitizenHomePage() {
   const onChange = (currentSlide) => {};
 
   return (
-    <div className="citizen-home-page">
-      {contextHolder}
-      <AppHeader></AppHeader>
+    user !== null &&
+    user !== undefined && (
+      <div className="citizen-home-page">
+        {contextHolder}
+        <AppHeader></AppHeader>
+        <div id="tab-menu">
+          <TabContext value={value}>
+            <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
+              <TabList onChange={handleChange} value={value} centered>
+                <Tab label={t("cityMap")} value="1" icon={<MapIcon />} />
+                <Tab
+                  label={t("newReport")}
+                  value="2"
+                  icon={<PostAddIcon />}
+                  disabled={guest}
+                />
+                <Tab
+                  label={t("reportHistory")}
+                  value="3"
+                  icon={<HistoryIcon />}
+                  disabled={guest}
+                />
+                <Tab
+                  label={t("logout")}
+                  icon={<LogoutIcon />}
+                  value="-1"
+                  disabled={guest}
+                ></Tab>
+                <Tab style={{ display: "none" }} value="0"></Tab>
+              </TabList>
+            </Box>
+            <TabPanel value="0">
+              <Card sx={{ maxWidth: 845 }}>
+                <CardMedia
+                  sx={{ height: 340 }}
+                  image={require("../../assets/images/bl.jpg")}
+                />
+                <CardContent>
+                  <Typography gutterBottom variant="h5" component="div">
+                    {t("intro")}
+                  </Typography>
+                </CardContent>
+              </Card>
+            </TabPanel>
+            <TabPanel value="1">
+              <CityMap></CityMap>
+            </TabPanel>
+            <TabPanel value="2">
+              <div className="report-container">
+                <Form
+                  form={form}
+                  name="reportForm"
+                  initialValues={{ remember: true }}
+                  onSubmit={() => submit()}
+                  autoComplete="off"
+                >
+                  <Form.Item
+                    name="type"
+                    rules={[{ required: true, message: t("requiredSelect") }]}
+                  >
+                    <Select
+                      showSearch
+                      placeholder={t("type")}
+                      optionFilterProp="children"
+                      style={{ fontSize: "18px" }}
+                      size="large"
+                      filterOption={(input, option) =>
+                        (option?.label ?? "")
+                          .toLowerCase()
+                          .includes(input.toLowerCase())
+                      }
+                      options={reportTypes}
+                    />
+                  </Form.Item>
+                  <Form.Item
+                    name="title"
+                    rules={[{ required: true, message: t("required") }]}
+                  >
+                    <Input
+                      placeholder={t("title")}
+                      style={{ fontSize: "18px" }}
+                      size="large"
+                    />
+                  </Form.Item>
+                  <Form.Item name="content">
+                    <TextArea
+                      placeholder={t("content")}
+                      style={{ fontSize: "18px" }}
+                      size="large"
+                      rows={5}
+                    />
+                  </Form.Item>
+                  <Form.Item name="note">
+                    <TextArea
+                      placeholder={t("note")}
+                      style={{ fontSize: "18px" }}
+                      size="large"
+                      rows={3}
+                    />
+                  </Form.Item>
+                  <Form.Item>
+                    <LocationPicker callback={changePosition}></LocationPicker>
+                  </Form.Item>
+                  <Form.Item>
+                    <ImageUpload identificator={ident}></ImageUpload>
+                  </Form.Item>
+                  <Form.Item>
+                    <Button
+                      type="primary"
+                      htmlType="submit"
+                      className="login-form-button"
+                      onClick={() => submit()}
+                      id="send-btn"
+                      style={{
+                        fontSize: "20px",
+                        lineHeight: "20px",
+                        margin: "0 0 10px 0",
+                      }}
+                    >
+                      {t("send")}
+                    </Button>
+                  </Form.Item>
+                </Form>
+              </div>
+            </TabPanel>
+            <TabPanel value="3">
+              <div className="wrapper">
+                <div id="user-info-div">
+                  <AccountCircleIcon
+                    sx={{ fontSize: "50px" }}
+                    color="info"
+                  ></AccountCircleIcon>
+                  <span id="user-info">
+                    {user.user.firstName + " " + user.user.lastName}
+                  </span>
+                </div>
+                <div className="filter-sort-div">
+                  <Select
+                    onChange={typeFilter}
+                    placeholder={t("typeFilter")}
+                    optionFilterProp="children"
+                    style={{ fontSize: "18px" }}
+                    size="large"
+                    options={reportFilterTypes}
+                    className="filter-sort-select"
+                  />
+                  <Select
+                    onChange={stateFilter}
+                    placeholder={t("stateFilter")}
+                    optionFilterProp="children"
+                    style={{ fontSize: "18px" }}
+                    size="large"
+                    options={reportStates}
+                    className="filter-sort-select"
+                  />
+                  <Select
+                    onChange={sortFunc}
+                    placeholder={t("sort")}
+                    optionFilterProp="children"
+                    style={{ fontSize: "18px" }}
+                    size="large"
+                    options={sortCriteria}
+                    className="filter-sort-select"
+                  />
+                </div>
+                <div className="report-history-container">
+                  <Collapse accordion>
+                    {myFilteredReports &&
+                      myFilteredReports
+                        .sort(sortFunction.method)
+                        .map((report) => {
+                          return (
+                            <Panel
+                              header={
+                                <span className="reportHeader">
+                                  <span className="title-span">
+                                    {counter++}.&nbsp;&nbsp;&nbsp;{report.title}
+                                  </span>
+                                  <span className="type-span">
+                                    {t("reportType")}&nbsp;&nbsp;&nbsp;
+                                    {t(report.type)}
+                                  </span>
+                                  <span className="time-span">
+                                    {t("reportCreationTime")}&nbsp;&nbsp;&nbsp;
+                                    {report.date}
+                                  </span>
+                                  <span className="state-span">
+                                    {t(report.state)}
 
-      {/* {u && (
-        <CitizenInfo
-          firstname={u.firstName}
-          lastname={u.lastName}
-        ></CitizenInfo>
-      )} */}
-      <div id="tab-menu">
-        <TabContext value={value}>
-          <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
-            <TabList onChange={handleChange} value={value} centered>
-              <Tab label={t("cityMap")} value="1" icon={<MapIcon />} />
-              <Tab
-                label={t("newReport")}
+                                    {report.requiredInfo && (
+                                      <span>
+                                        &nbsp;&nbsp;&nbsp;&nbsp;
+                                        <Badge badgeContent={1} color="primary">
+                                          <MailIcon color="action" />
+                                        </Badge>
+                                      </span>
+                                    )}
+                                  </span>
+                                </span>
+                              }
+                              key={report.id}
+                              className="reportInfo"
+                            >
+                              <p>
+                                <span className="title-span-extended">
+                                  {t("content") + ": "}
+                                </span>
+                                <br />
+                                {report.content}
+                              </p>
+                              <p>
+                                <span className="title-span-extended">
+                                  {t("note") + ": "}
+                                </span>
+                                <br />
+                                {report.note !== null && report.note !== ""
+                                  ? report.note
+                                  : "-"}
+                              </p>
+                              {report.providedAdditionalInfo !== null &&
+                                report.providedAdditionalInfo !== "" && (
+                                  <p>
+                                    <span className="title-span-extended">
+                                      {t("additionalInfo") + ": "}
+                                    </span>
+                                    <br />
+                                    {report.providedAdditionalInfo}
+                                  </p>
+                                )}
+                              {report.requiredInfo && (
+                                <p>
+                                  <span className="title-span-extended">
+                                    {t("requiredInfo") + ": "}
+                                  </span>
+                                  <br />
+                                  <b>{report.requiredAdditionalInfo}</b>
+                                </p>
+                              )}
+                              {report.requiredInfo && (
+                                <ReportAdditionalInfoForm
+                                  report={report.id}
+                                  func={signal}
+                                ></ReportAdditionalInfoForm>
+                              )}
+
+                              <div className="galery-container">
+                                <Carousel afterChange={onChange}>
+                                  {report.images &&
+                                    report.images.map((img) => {
+                                      return (
+                                        <div key={img.id}>
+                                          <img
+                                            src={
+                                              obj.proxy +
+                                              "/CityReportSystem/reports/images/" +
+                                              img.id
+                                            }
+                                            style={contentStyle}
+                                          ></img>
+                                        </div>
+                                      );
+                                    })}
+                                </Carousel>
+                              </div>
+                            </Panel>
+                          );
+                        })}
+                  </Collapse>
+                </div>
+              </div>
+            </TabPanel>
+          </TabContext>
+        </div>
+        <div id="lng-select">
+          <LanguageSelector></LanguageSelector>
+        </div>
+
+        <div id="bottom-menu">
+          <Box sx={{ centered: true }}>
+            <BottomNavigation showLabels value={value} onChange={handleChange}>
+              <BottomNavigationAction
+                label={t("cityMap")}
+                value="1"
+                icon={<MapIcon />}
+              />
+              <BottomNavigationAction
+                label={t("newReportMobile")}
                 value="2"
                 icon={<PostAddIcon />}
                 disabled={guest}
               />
-              <Tab
-                label={t("reportHistory")}
+              <BottomNavigationAction
+                label={t("reportHistoryMobile")}
                 value="3"
                 icon={<HistoryIcon />}
                 disabled={guest}
               />
-              <Tab
-                label={t("logout")}
-                icon={<LogoutIcon />}
+              <BottomNavigationAction
+                label={t("logoutMobile")}
                 value="-1"
+                icon={<LogoutIcon />}
                 disabled={guest}
-              ></Tab>
-              <Tab style={{ display: "none" }} value="0"></Tab>
-            </TabList>
-          </Box>
-          <TabPanel value="0">
-            <Card sx={{ maxWidth: 845 }}>
-              <CardMedia
-                sx={{ height: 340 }}
-                image={require("../../assets/images/bl.jpg")}
-                title="green iguana"
               />
-              <CardContent>
-                <Typography gutterBottom variant="h5" component="div">
-                  {t("intro")}
-                </Typography>
-              </CardContent>
-            </Card>
-          </TabPanel>
-          <TabPanel value="1">
-            <CityMap></CityMap>
-          </TabPanel>
-          <TabPanel value="2">
-            <div className="report-container">
-              <Form
-                form={form}
-                name="reportForm"
-                initialValues={{ remember: true }}
-                onSubmit={() => submit()}
-                autoComplete="off"
-              >
-                <Form.Item
-                  name="type"
-                  rules={[{ required: true, message: t("requiredSelect") }]}
-                >
-                  <Select
-                    showSearch
-                    placeholder={t("type")}
-                    optionFilterProp="children"
-                    style={{ fontSize: "18px" }}
-                    size="large"
-                    filterOption={(input, option) =>
-                      (option?.label ?? "")
-                        .toLowerCase()
-                        .includes(input.toLowerCase())
-                    }
-                    options={reportTypes}
-                  />
-                </Form.Item>
-                <Form.Item
-                  name="title"
-                  rules={[{ required: true, message: t("required") }]}
-                >
-                  <Input
-                    placeholder={t("title")}
-                    style={{ fontSize: "18px" }}
-                    size="large"
-                  />
-                </Form.Item>
-                <Form.Item name="content">
-                  <TextArea
-                    placeholder={t("content")}
-                    style={{ fontSize: "18px" }}
-                    size="large"
-                    rows={5}
-                  />
-                </Form.Item>
-                <Form.Item name="note">
-                  <TextArea
-                    placeholder={t("note")}
-                    style={{ fontSize: "18px" }}
-                    size="large"
-                    rows={3}
-                  />
-                </Form.Item>
-                <Form.Item>
-                  <LocationPicker callback={changePosition}></LocationPicker>
-                </Form.Item>
-                <Form.Item>
-                  <ImageUpload identificator={ident}></ImageUpload>
-                </Form.Item>
-                <Form.Item>
-                  <Button
-                    type="primary"
-                    htmlType="submit"
-                    className="login-form-button"
-                    onClick={() => submit()}
-                    id="send-btn"
-                    style={{
-                      fontSize: "20px",
-                      lineHeight: "20px",
-                      margin: "0 0 10px 0",
-                    }}
-                  >
-                    {t("send")}
-                  </Button>
-                </Form.Item>
-              </Form>
-            </div>
-          </TabPanel>
-          <TabPanel value="3">
-            <div className="wrapper">
-              <div className="filter-sort-div">
-                <Select
-                  onChange={typeFilter}
-                  placeholder={t("typeFilter")}
-                  optionFilterProp="children"
-                  style={{ fontSize: "18px" }}
-                  size="large"
-                  options={reportFilterTypes}
-                  className="filter-sort-select"
-                />
-                <Select
-                  onChange={stateFilter}
-                  placeholder={t("stateFilter")}
-                  optionFilterProp="children"
-                  style={{ fontSize: "18px" }}
-                  size="large"
-                  options={reportStates}
-                  className="filter-sort-select"
-                />
-                <Select
-                  onChange={sortFunc}
-                  placeholder={t("sort")}
-                  optionFilterProp="children"
-                  style={{ fontSize: "18px" }}
-                  size="large"
-                  options={sortCriteria}
-                  className="filter-sort-select"
-                />
-              </div>
-              <div className="report-history-container">
-                <Collapse accordion>
-                  {myFilteredReports &&
-                    myFilteredReports
-                      .sort(sortFunction.method)
-                      .map((report) => {
-                        return (
-                          <Panel
-                            header={
-                              <span className="reportHeader">
-                                <span className="title-span">
-                                  {counter++}.&nbsp;&nbsp;&nbsp;{report.title}
-                                </span>
-                                <span className="type-span">
-                                  {t("reportType")}&nbsp;&nbsp;&nbsp;
-                                  {t(report.type)}
-                                </span>
-                                <span className="time-span">
-                                  {t("reportCreationTime")}&nbsp;&nbsp;&nbsp;
-                                  {report.date}
-                                </span>
-                                <span className="state-span">
-                                  {t(report.state)}
-
-                                  {report.requiredInfo && (
-                                    <span>
-                                      &nbsp;&nbsp;&nbsp;&nbsp;
-                                      <Badge badgeContent={1} color="primary">
-                                        <MailIcon color="action" />
-                                      </Badge>
-                                    </span>
-                                  )}
-                                </span>
-                              </span>
-                            }
-                            key={report.id}
-                            className="reportInfo"
-                          >
-                            <p>
-                              <span className="title-span-extended">
-                                {t("content") + ": "}
-                              </span>
-                              <br />
-                              {report.content}
-                            </p>
-                            <p>
-                              <span className="title-span-extended">
-                                {t("note") + ": "}
-                              </span>
-                              <br />
-                              {report.note !== null && report.note !== ""
-                                ? report.note
-                                : "-"}
-                            </p>
-                            {report.providedAdditionalInfo !== null &&
-                              report.providedAdditionalInfo !== "" && (
-                                <p>
-                                  <span className="title-span-extended">
-                                    {t("additionalInfo") + ": "}
-                                  </span>
-                                  <br />
-                                  {report.providedAdditionalInfo}
-                                </p>
-                              )}
-                            {report.requiredInfo && (
-                              <p>
-                                <span className="title-span-extended">
-                                  {t("requiredInfo") + ": "}
-                                </span>
-                                <br />
-                                <b>{report.requiredAdditionalInfo}</b>
-                              </p>
-                            )}
-                            {report.requiredInfo && (
-                              <ReportAdditionalInfoForm
-                                report={report.id}
-                                func={signal}
-                              ></ReportAdditionalInfoForm>
-                            )}
-
-                            <div className="galery-container">
-                              <Carousel afterChange={onChange}>
-                                {report.images &&
-                                  report.images.map((img) => {
-                                    return (
-                                      <div key={img.id}>
-                                        <img
-                                          src={
-                                            obj.proxy +
-                                            "/CityReportSystem/reports/images/" +
-                                            img.id
-                                          }
-                                          style={contentStyle}
-                                        ></img>
-                                      </div>
-                                    );
-                                  })}
-                              </Carousel>
-                            </div>
-                          </Panel>
-                        );
-                      })}
-                </Collapse>
-              </div>
-            </div>
-          </TabPanel>
-        </TabContext>
+            </BottomNavigation>
+          </Box>
+        </div>
+        <div id="footer">
+          <AppFooter></AppFooter>
+        </div>
       </div>
-      <div id="lng-select">
-        <LanguageSelector></LanguageSelector>
-      </div>
-
-      <div id="bottom-menu">
-        <Box sx={{ centered: true }}>
-          <BottomNavigation showLabels value={value} onChange={handleChange}>
-            <BottomNavigationAction
-              label={t("cityMap")}
-              value="1"
-              icon={<MapIcon />}
-            />
-            <BottomNavigationAction
-              label={t("newReportMobile")}
-              value="2"
-              icon={<PostAddIcon />}
-              disabled={guest}
-            />
-            <BottomNavigationAction
-              label={t("reportHistoryMobile")}
-              value="3"
-              icon={<HistoryIcon />}
-              disabled={guest}
-            />
-            <BottomNavigationAction
-              label={t("logoutMobile")}
-              value="-1"
-              icon={<LogoutIcon />}
-              disabled={guest}
-            />
-          </BottomNavigation>
-        </Box>
-      </div>
-      <div id="footer">
-        <AppFooter></AppFooter>
-      </div>
-    </div>
+    )
   );
 }

@@ -4,6 +4,7 @@ import "./App.css";
 import { LogIn } from "./pages/LogIn/index";
 import { SignUp } from "./pages/SignUp/index";
 import { CitizenHomePage } from "./pages/CitizenHomePage/index";
+import { CityOfficialHomePage } from "./pages/CityOfficialHomePage/index";
 import initializeI18n from "./utils/internationalization/initialize";
 
 // koristi se za prevodjenje (inicijalizuje se trenutni jezik, na osnovu vrijednosti procitanje iz local storage)
@@ -25,6 +26,7 @@ function App() {
           exact
           element={<LogIn />}
         ></Route>
+        <Route path="/CityReportSystem/login" exact element={<LogIn />}></Route>
         <Route
           path="/CityReportSystem/citizen/signup"
           exact
@@ -39,6 +41,16 @@ function App() {
           path="/CityReportSystem/citizen/home"
           exact
           element={<CitizenHomePage />}
+        ></Route>
+        <Route
+          path="/CityReportSystem/city/home"
+          exact
+          element={<CityOfficialHomePage />}
+        ></Route>
+        <Route
+          path="/CityReportSystem/city"
+          exact
+          element={<CityOfficialHomePage />}
         ></Route>
         <Route path="*" element={<LogIn />}></Route>
       </Routes>

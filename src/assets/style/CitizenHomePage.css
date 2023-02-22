@@ -187,3 +187,15 @@
 #hidden-tab{
     display: none;
 }
+#user-info-div{
+    display: flex;
+    flex-direction: row;
+    margin-bottom: 15px;
+}
+#user-info{
+    line-height: 50px;
+    font-size: 2vmax;
+    display: flex;
+    align-items: center;
+    margin-left: 5px;
+}

@@ -21,17 +21,22 @@ export function LogIn() {
     console.log(value);
     if (value === "citizen") navigate("/CityReportSystem/citizen/home");
     else {
-      console.log("not implemented");
+      console.log("not citizen");
       if (sessionStorage.getItem("user") !== null) {
         if (
           JSON.parse(sessionStorage.getItem("user")).user.role ===
           "CITY_MANAGER"
-        )
+        ) {
+          console.log("navigating to city manager page");
           navigate("/CityReportSystem/city/manager/home");
-      } else if (
-        JSON.parse(sessionStorage.getItem("user")).user.role === "CITY_OFFICIAL"
-      )
-        navigate("/CityReportSystem/city/official/home");
+        } else if (
+          JSON.parse(sessionStorage.getItem("user")).user.role ===
+          "CITY_OFFICIAL"
+        ) {
+          console.log("navigating to city offical page");
+          navigate("/CityReportSystem/city/home");
+        }
+      }
     }
   };
 
