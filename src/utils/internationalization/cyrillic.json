@@ -103,5 +103,11 @@
   "INFO": "Информације",
   "DANGER": "Опасност",
   "WORK_IN_PROGRESS": "Радови",
-  "from": "од"
+  "from": "од",
+  "filter": "филтери",
+  "eventCreator": "Надлежни",
+  "Komunalna policija": "Комунална полиција",
+  "addInfo": "Додатне информације",
+  "newEvent": "Додај ново дешавање",
+  "noAddInfo": "Нема додатних информација"
 }

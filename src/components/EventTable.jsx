@@ -15,10 +15,27 @@ import { useTranslation } from "react-i18next";
 import { getEvents } from "../services/eventService";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
-// import Typography from "@mui/material/Typography";
+import Typography from "@mui/material/Typography";
 import IconButton from "@mui/material/IconButton";
 import Collapse from "@mui/material/Collapse";
+import Toolbar from "@mui/material/Toolbar";
+import FilterListIcon from "@mui/icons-material/FilterList";
 import "../assets/style/EventTable.css";
+import Tooltip from "@mui/material/Tooltip";
+import CalendarMonthIconTwoTone from "@mui/icons-material/CalendarMonthTwoTone";
+import FingerprintTwoToneIcon from "@mui/icons-material/FingerprintTwoTone";
+import VerifiedTwoToneIcon from "@mui/icons-material/VerifiedTwoTone";
+import SupervisorAccountTwoToneIcon from "@mui/icons-material/SupervisorAccountTwoTone";
+import ReceiptLongTwoToneIcon from "@mui/icons-material/ReceiptLongTwoTone";
+import Divider from "@mui/material/Divider";
+import InfoTwoToneIcon from "@mui/icons-material/InfoTwoTone";
+import ManageAccountsTwoToneIcon from "@mui/icons-material/ManageAccountsTwoTone";
+import DeleteIcon from "@mui/icons-material/Delete";
+import SettingsTwoToneIcon from "@mui/icons-material/SettingsTwoTone";
+import LocationOnTwoToneIcon from "@mui/icons-material/LocationOnTwoTone";
+import { Carousel } from "antd";
+import noimg from "../assets/images/no-img.png";
+import AddBoxTwoToneIcon from "@mui/icons-material/AddBoxTwoTone";
 function descendingComparator(a, b, orderBy) {
   console.log(orderBy);
   if (orderBy === "date") {
@@ -74,30 +91,42 @@ export function EnhancedTableHead(props) {
       numeric: false,
       disablePadding: false,
       label: t("eventId"),
+      icon: FingerprintTwoToneIcon,
     },
     {
       id: "title",
       numeric: false,
       disablePadding: false,
       label: t("eventTitle"),
+      icon: "-",
     },
     {
       id: "type",
       numeric: false,
       disablePadding: false,
       label: t("eventType"),
+      icon: ReceiptLongTwoToneIcon,
     },
     {
       id: "date",
       numeric: false,
       disablePadding: false,
       label: t("eventDate"),
+      icon: CalendarMonthIconTwoTone,
+    },
+    {
+      id: "creator.department.name",
+      numeric: false,
+      disablePadding: false,
+      label: t("eventCreator"),
+      icon: SupervisorAccountTwoToneIcon,
     },
     {
       id: "active",
       numeric: false,
       disablePadding: false,
       label: t("eventState"),
+      icon: VerifiedTwoToneIcon,
     },
   ];
   return (
@@ -115,6 +144,7 @@ export function EnhancedTableHead(props) {
               direction={orderBy === headCell.id ? order : "asc"}
               onClick={createSortHandler(headCell.id)}
             >
+              {headCell.icon !== "-" && <headCell.icon />}
               {headCell.label}
               {orderBy === headCell.id ? (
                 <Box component="span" sx={visuallyHidden}>
@@ -135,12 +165,44 @@ EnhancedTableHead.propTypes = {
   order: PropTypes.oneOf(["asc", "desc"]).isRequired,
   orderBy: PropTypes.string.isRequired,
 };
+function EnhancedTableToolbar() {
+  const { t } = useTranslation();
+  return (
+    <Toolbar
+      sx={{
+        pl: { sm: 2 },
+        pr: { xs: 1, sm: 1 },
+
+        bgcolor: "#d0dbe0",
+      }}
+    >
+      <Typography
+        sx={{ flex: "1 1 100%" }}
+        variant="h6"
+        id="tableTitle"
+        component="div"
+      >
+        {t("events")}
+      </Typography>
+      <Tooltip title={t("newEvent")}>
+        <IconButton>
+          <AddBoxTwoToneIcon color="success" />
+        </IconButton>
+      </Tooltip>
+      <Tooltip title={t("filter")}>
+        <IconButton>
+          <FilterListIcon color="secondary" />
+        </IconButton>
+      </Tooltip>
+    </Toolbar>
+  );
+}
 
 export default function EventTable() {
   const [rows, changeRows] = React.useState([]);
   const { t } = useTranslation();
   const [order, setOrder] = React.useState("desc");
-  const [orderBy, setOrderBy] = React.useState("date");
+  const [orderBy, setOrderBy] = React.useState("active");
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
   const [total, changeTotal] = React.useState(-1);
@@ -178,6 +240,7 @@ export default function EventTable() {
     rows && (
       <Box sx={{ width: "100%" }}>
         <Paper sx={{ width: "100%", mb: 2 }}>
+          <EnhancedTableToolbar></EnhancedTableToolbar>
           <TableContainer>
             <Table sx={{ minWidth: 750 }} size="small">
               <EnhancedTableHead
@@ -230,6 +293,17 @@ function Row(props) {
   const { row } = props;
   const [open, setOpen] = React.useState(false);
   const { t } = useTranslation();
+  const contentStyle = {
+    margin: "auto",
+    height: "405px",
+    color: "#fff",
+    lineHeight: "380px",
+    textAlign: "center",
+    background: "#364d79",
+    maxWidth: "100%",
+    maxHeight: "100%",
+    borderRadius: "40px",
+  };
   return (
     <React.Fragment>
       <TableRow sx={{ "& > *": { borderBottom: "unset" } }}>
@@ -237,6 +311,7 @@ function Row(props) {
         <TableCell align="left">{row.title}</TableCell>
         <TableCell align="left">{t(row.type)}</TableCell>
         <TableCell align="left">{row.date}</TableCell>
+        <TableCell align="left">{t(row.creator.department.name)}</TableCell>
         <TableCell align="left">
           {row.active === true ? t("active") : t("inactive")}
         </TableCell>
@@ -251,36 +326,80 @@ function Row(props) {
         </TableCell>
       </TableRow>
       <TableRow>
-        <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
+        <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={7}>
           <Collapse in={open} timeout="auto" unmountOnExit>
-            <Box sx={{ margin: 1 }}>
-              {/* <Typography variant="h6" gutterBottom component="div">
-                History
-              </Typography>
-              <Table size="small" aria-label="purchases">
-                <TableHead>
-                  <TableRow>
-                    <TableCell>Date</TableCell>
-                    <TableCell>Customer</TableCell>
-                    <TableCell align="right">Amount</TableCell>
-                    <TableCell align="right">Total price ($)</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {row.history.map((historyRow) => (
-                    <TableRow key={historyRow.date}>
-                      <TableCell component="th" scope="row">
-                        {historyRow.date}
-                      </TableCell>
-                      <TableCell>{historyRow.customerId}</TableCell>
-                      <TableCell align="right">{historyRow.amount}</TableCell>
-                      <TableCell align="right">
-                        {Math.round(historyRow.amount * row.price * 100) / 100}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table> */}
+            <Box>
+              <div id="flex-column-container">
+                <div className="flex-div half-width">
+                  <p className="event-info">
+                    <InfoTwoToneIcon sx={{ fontSize: 30 }} color="success" />{" "}
+                    {row.description}
+                  </p>
+                  <Divider />
+                  <p className="event-creator-info">
+                    <span className="creator-info-span">
+                      <ManageAccountsTwoToneIcon color="info" />{" "}
+                      {row.creator.firstName + " " + row.creator.lastName}
+                    </span>
+                    <br></br>
+                    <span className="department-span">
+                      {row.creator.position}
+
+                      <br></br>
+                      {row.creator.department.name}
+                    </span>
+                  </p>
+                  <Divider />
+                  <div className="controls">
+                    <IconButton color="primary" sx={{ fontSize: 37 }}>
+                      <LocationOnTwoToneIcon fontSize="inherit" />
+                    </IconButton>
+                    {row.creator.id ===
+                      JSON.parse(sessionStorage.getItem("user")).user.id &&
+                      row.active && (
+                        <>
+                          <IconButton color="success" sx={{ fontSize: 37 }}>
+                            <SettingsTwoToneIcon fontSize="inherit" />
+                          </IconButton>
+                          <IconButton color="error" sx={{ fontSize: 37 }}>
+                            <DeleteIcon fontSize="inherit" />
+                          </IconButton>
+                        </>
+                      )}
+                  </div>
+                </div>
+                <div className="flex-div half-width" id="gallery">
+                  {row.images.length > 0 ? (
+                    <Carousel>
+                      {row.images.map((img) => {
+                        console.log(img);
+                        return (
+                          <div key={img.id}>
+                            <img
+                              src={
+                                "http://192.168.100.8:8080/CityReportSystem/events/active/images/" +
+                                img.id
+                              }
+                              style={contentStyle}
+                            ></img>
+                          </div>
+                        );
+                      })}
+                    </Carousel>
+                  ) : (
+                    <div id="no-img">
+                      <img src={noimg} id="no-img-img"></img>
+                    </div>
+                  )}
+                </div>
+                <div className="flex-div half-width">
+                  <p className="info-title">{t("addInfo")}</p>
+                  <Divider />
+                  <p className="info-content">
+                    {row.info && row.info !== "" ? row.info : t("noAddInfo")}
+                  </p>
+                </div>
+              </div>
             </Box>
           </Collapse>
         </TableCell>

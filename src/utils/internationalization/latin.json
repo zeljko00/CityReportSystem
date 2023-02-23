@@ -103,5 +103,10 @@
   "INFO": "Informacije",
   "DANGER": "Opasnost",
   "WORK_IN_PROGRESS": "Radovi",
-  "from": "od"
+  "from": "od",
+  "filter": "filteri",
+  "eventCreator": "Nadležni",
+  "addInfo": "Dodatne informacije",
+  "newEvent": "Dodaj novo dešavanje",
+  "noAddInfo": "Nema dodatnih informacija"
 }
