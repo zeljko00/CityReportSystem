@@ -1,0 +1,125 @@
+import * as React from "react";
+import { Button, Form, Input, Radio } from "antd";
+import ImageUpload from "../components/ImageUpload";
+import LocationPicker from "../components/LocationPicker";
+import { useTranslation } from "react-i18next";
+import { createEvent } from "../services/eventService";
+import PropTypes from "prop-types";
+export function NewEventDialog(props) {
+  const { t } = useTranslation();
+  const [form] = Form.useForm();
+  const { TextArea } = Input;
+  let ident = Math.floor(Math.random() * 1000000 + 1);
+  let position = null;
+  let type = null;
+  const changePosition = (pos) => {
+    position = pos;
+  };
+  const submit = () => {
+    form.validateFields().then((values) => {
+      if (position === null) {
+        props.returnData("location missing");
+      } else {
+        const user = JSON.parse(sessionStorage.getItem("user")).user;
+        const event = {
+          random: ident,
+          title: values.title,
+          description: values.desc,
+          type,
+          x: position[0],
+          y: position[1],
+          creator: user.id,
+        };
+        console.log(event);
+        createEvent(event)
+          .then((response) => {
+            ident = Math.floor(Math.random() * 1000000 + 1);
+            form.resetFields();
+            props.returnData(response.data);
+          })
+          .catch(() => {
+            props.returnData("error");
+          });
+      }
+    });
+  };
+  const types = [
+    { value: "WORK_IN_PROGRESS", label: t("work") },
+    { value: "DANGER", label: t("danger") },
+    { value: "INFO", label: t("info") },
+  ];
+
+  const onChange = (event) => {
+    console.log(event);
+    type = event.target.value;
+  };
+  return (
+    <Form
+      form={form}
+      name="newEventForm"
+      initialValues={{ remember: true }}
+      onSubmit={() => submit()}
+      autoComplete="off"
+    >
+      <Form.Item
+        name="type"
+        rules={[{ required: true, message: t("requiredSelect") }]}
+      >
+        <Radio.Group
+          options={types}
+          onChange={onChange}
+          value={{ value: "INFO", label: "INFO" }}
+          optionType="button"
+          buttonStyle="solid"
+        />
+      </Form.Item>
+
+      <Form.Item
+        name="title"
+        rules={[{ required: true, message: t("required") }]}
+      >
+        <Input
+          placeholder={t("title")}
+          style={{ fontSize: "18px" }}
+          size="large"
+        />
+      </Form.Item>
+      <Form.Item name="desc">
+        <TextArea
+          placeholder={t("desc")}
+          style={{ fontSize: "18px" }}
+          size="large"
+          rows={5}
+        />
+      </Form.Item>
+      <Form.Item>
+        <LocationPicker
+          callback={changePosition}
+          deviceLocation={false}
+        ></LocationPicker>
+      </Form.Item>
+      <Form.Item>
+        <ImageUpload identificator={ident}></ImageUpload>
+      </Form.Item>
+      <Form.Item>
+        <Button
+          type="primary"
+          htmlType="submit"
+          className="login-form-button"
+          onClick={() => submit()}
+          id="send-btn"
+          style={{
+            fontSize: "20px",
+            lineHeight: "20px",
+            margin: "0 0 10px 0",
+          }}
+        >
+          {t("save")}
+        </Button>
+      </Form.Item>
+    </Form>
+  );
+}
+NewEventDialog.propTypes = {
+  returnData: PropTypes.func,
+};

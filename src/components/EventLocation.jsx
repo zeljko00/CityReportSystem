@@ -1,51 +1,18 @@
-import React, { useState, useMemo, useRef } from "react";
-import { MapContainer, TileLayer, Marker, Polygon } from "react-leaflet";
-import "leaflet/dist/leaflet.css";
-import "../assets/style/CityMap.css";
-import { useTranslation } from "react-i18next";
+import React from "react";
+import { MapContainer, TileLayer, Marker, Popup, Polygon } from "react-leaflet";
 import L from "leaflet";
-import icon from "leaflet/dist/images/marker-icon.png";
-import iconShadow from "leaflet/dist/images/marker-shadow.png";
-import { Button } from "antd";
+import "leaflet/dist/leaflet.css";
+import "../assets/style/EventLocation.css";
+import { useTranslation } from "react-i18next";
 import PropTypes from "prop-types";
-function LocationPicker(props) {
+function EventLocation(props) {
+  console.log(props);
   const { t } = useTranslation();
-  const markerRef = useRef(null);
-  const deviceLocation = props.deviceLocation;
-  const eventHandlers = useMemo(() => ({
-    dragend() {
-      const marker = markerRef.current;
-      if (marker != null) {
-        const pos = marker.getLatLng();
-        setPosition([pos.lat, pos.lng]);
-        props.callback(position);
-        console.log(position);
-      }
-    },
-  }));
-
-  const [position, setPosition] = useState([
-    44.78798121640895, 17.201115245677336,
-  ]);
-
-  // problem with loading default marker icon solved with following code
-  const DefIcon = L.icon({
-    iconUrl: icon,
-    shadowUrl: iconShadow,
+  const event = props.event;
+  const pos = [];
+  props.event.coords.forEach((c) => {
+    pos.push([c.x, c.y]);
   });
-  L.Marker.prototype.options.icon = DefIcon;
-
-  const getLocation = () => {
-    navigator.geolocation.getCurrentPosition(
-      function (pos) {
-        setPosition([pos.coords.latitude, pos.coords.longitude]);
-        props.callback(position);
-      },
-      function (error) {
-        alert(error.message);
-      }
-    );
-  };
 
   const polygon = [
     [44.8726118, 17.2588105],
@@ -121,9 +88,12 @@ function LocationPicker(props) {
     [44.8726118, 17.2588105],
   ];
   const limeOptions = { color: "lime" };
+  const infoOptions = { color: "blue" };
+  const dangerOptions = { color: "red" };
+  const workOptions = { color: "yellow" };
 
   return (
-    <div className="mapArea">
+    <div className="locationArea">
       <MapContainer
         center={[44.78798121640895, 17.201115245677336]}
         zoom={12}
@@ -134,37 +104,86 @@ function LocationPicker(props) {
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
-
+        {event.type === "INFO"
+          ? addMarkers(
+              event.title,
+              event.description,
+              event.info,
+              event.date,
+              event.x,
+              event.y,
+              event.type,
+              event.creator.department.name,
+              event.images,
+              t
+            )
+          : event.type === "DANGER"
+          ? addMarkers(
+              event.title,
+              event.desc,
+              event.info,
+              event.date,
+              event.x,
+              event.y,
+              event.type,
+              event.creator.department.name,
+              event.images,
+              t
+            )
+          : addMarkers(
+              event.title,
+              event.desc,
+              event.info,
+              event.date,
+              event.x,
+              event.y,
+              event.type,
+              event.creator.department.name,
+              event.images,
+              t
+            )}
         <Polygon pathOptions={limeOptions} positions={polygon} />
-        <Marker
-          draggable={true}
-          eventHandlers={eventHandlers}
-          position={position}
-          ref={markerRef}
-        ></Marker>
+        <Polygon
+          key={props.event.id}
+          pathOptions={
+            event.type === "INFO"
+              ? infoOptions
+              : event.type === "DANGER"
+              ? dangerOptions
+              : workOptions
+          }
+          positions={pos}
+        ></Polygon>
       </MapContainer>
-      {deviceLocation && (
-        <Button
-          type="primary"
-          className="location-button"
-          onClick={() => getLocation()}
-          id="locate-btn"
-          style={{
-            fontSize: "20px",
-            lineHeight: "20px",
-            margin: "20px 0px 0px 0px",
-          }}
-        >
-          {t("locate")}
-        </Button>
-      )}
     </div>
   );
 }
-
-LocationPicker.propTypes = {
-  callback: PropTypes.func,
-  deviceLocation: PropTypes.bool,
+function addMarkers(title, desc, info, date, x, y, type, creator, images, t) {
+  const markerIcon = new L.Icon({
+    iconUrl: require(type === "INFO"
+      ? "../assets/images/info.png"
+      : type === "DANGER"
+      ? "../assets/images/danger.png"
+      : "../assets/images/work.png"),
+    iconSize:
+      type === "WORK_IN_PROGRESS"
+        ? [37, 37]
+        : type === "INFO"
+        ? [32, 32]
+        : [53, 43],
+  });
+  return (
+    <Marker position={[x, y]} icon={markerIcon}>
+      ;
+      <Popup>
+        <h3>{title}</h3>
+        <h4>{creator + "  -  " + date}</h4>
+      </Popup>
+    </Marker>
+  );
+}
+EventLocation.propTypes = {
+  event: PropTypes.object,
 };
 
-export default LocationPicker;
+export default EventLocation;

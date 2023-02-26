@@ -407,7 +407,10 @@ export function CitizenHomePage() {
                     />
                   </Form.Item>
                   <Form.Item>
-                    <LocationPicker callback={changePosition}></LocationPicker>
+                    <LocationPicker
+                      callback={changePosition}
+                      deviceLocation={true}
+                    ></LocationPicker>
                   </Form.Item>
                   <Form.Item>
                     <ImageUpload identificator={ident}></ImageUpload>

@@ -78,5 +78,21 @@ p{
     height: 100%;
 }
 #no-img-img{
-    width: 80%;
+    width: 65%;
+}
+.form-wrapper{
+    margin: 10px
+}
+.select-type{
+    overflow-y: visible;
+    z-index: -1;
+}
+.new-event-dialog{
+    z-index: 0;
+}
+.event-title{
+    text-align: center;
+    font-weight: 500;
+    font-style: oblique;
+    margin-bottom: 5px;
 }

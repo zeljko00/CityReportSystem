@@ -12,7 +12,11 @@ import Paper from "@mui/material/Paper";
 import TableCell from "@mui/material/TableCell";
 import { visuallyHidden } from "@mui/utils";
 import { useTranslation } from "react-i18next";
-import { getEvents } from "../services/eventService";
+import {
+  getEvents,
+  deleteEvent,
+  activateEvent,
+} from "../services/eventService";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import Typography from "@mui/material/Typography";
@@ -33,11 +37,21 @@ import ManageAccountsTwoToneIcon from "@mui/icons-material/ManageAccountsTwoTone
 import DeleteIcon from "@mui/icons-material/Delete";
 import SettingsTwoToneIcon from "@mui/icons-material/SettingsTwoTone";
 import LocationOnTwoToneIcon from "@mui/icons-material/LocationOnTwoTone";
-import { Carousel } from "antd";
+import { Carousel, message } from "antd";
 import noimg from "../assets/images/no-img.png";
 import AddBoxTwoToneIcon from "@mui/icons-material/AddBoxTwoTone";
+import Button from "@mui/material/Button";
+import Snackbar from "@mui/material/Snackbar";
+import MuiAlert from "@mui/material/Alert";
+import TextField from "@mui/material/TextField";
+import EventLocation from "../components/EventLocation";
+import DialogTitle from "@mui/material/DialogTitle";
+import Dialog from "@mui/material/Dialog";
+import DialogActions from "@mui/material/DialogActions";
+import { NewEventDialog } from "../components/NewEventDialog";
+import { UpdateEvent } from "../components/UpdateEvent";
+import DialogContent from "@mui/material/DialogContent";
 function descendingComparator(a, b, orderBy) {
-  console.log(orderBy);
   if (orderBy === "date") {
     const tokensA = a[orderBy].split(".");
     const tokensB = b[orderBy].split(".");
@@ -165,38 +179,6 @@ EnhancedTableHead.propTypes = {
   order: PropTypes.oneOf(["asc", "desc"]).isRequired,
   orderBy: PropTypes.string.isRequired,
 };
-function EnhancedTableToolbar() {
-  const { t } = useTranslation();
-  return (
-    <Toolbar
-      sx={{
-        pl: { sm: 2 },
-        pr: { xs: 1, sm: 1 },
-
-        bgcolor: "#d0dbe0",
-      }}
-    >
-      <Typography
-        sx={{ flex: "1 1 100%" }}
-        variant="h6"
-        id="tableTitle"
-        component="div"
-      >
-        {t("events")}
-      </Typography>
-      <Tooltip title={t("newEvent")}>
-        <IconButton>
-          <AddBoxTwoToneIcon color="success" />
-        </IconButton>
-      </Tooltip>
-      <Tooltip title={t("filter")}>
-        <IconButton>
-          <FilterListIcon color="secondary" />
-        </IconButton>
-      </Tooltip>
-    </Toolbar>
-  );
-}
 
 export default function EventTable() {
   const [rows, changeRows] = React.useState([]);
@@ -206,7 +188,29 @@ export default function EventTable() {
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
   const [total, changeTotal] = React.useState(-1);
-
+  const [search, changeSearch] = React.useState("");
+  const returnNewEvent = (data) => {
+    if (data === "error") {
+      changeMsg("eventNotCreated");
+      changeSeverity("error");
+    } else if (data === "location missing") {
+      changeMsg("locationMissing");
+      changeSeverity("error");
+    } else {
+      console.log("new *event:");
+      console.log(data);
+      const temp = rows;
+      temp.push(data);
+      const tempUser = JSON.parse(sessionStorage.getItem("user"));
+      tempUser.user.createdEventsNum++;
+      tempUser.user.activeEventsNum++;
+      sessionStorage.setItem("user", JSON.stringify(tempUser));
+      changeRows(temp);
+      changeMsg("eventCreated");
+      changeSeverity("success");
+    }
+    handleClick();
+  };
   const handleRequestSort = (event, property) => {
     const isAsc = orderBy === property && order === "asc";
     setOrder(isAsc ? "desc" : "asc");
@@ -215,32 +219,129 @@ export default function EventTable() {
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
-    fetchData(newPage, rowsPerPage);
+    fetchData(newPage, rowsPerPage, search);
   };
 
   const handleChangeRowsPerPage = (event) => {
     const n = parseInt(event.target.value, 10);
     setRowsPerPage(n);
     setPage(0);
-    fetchData(0, n);
+    fetchData(0, n, search);
   };
 
   //  Avoid a layout jump when reaching the last page with empty rows.
-  const emptyRows =
-    page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0;
-  const fetchData = (page, size) => {
-    getEvents(page, size).then((result) => {
+  // const emptyRows =
+  //   page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0;
+  const fetchData = (page, size, search) => {
+    const titleToSearch =
+      search !== undefined && search != null && search !== "" ? search : "-";
+    console.log("fetch filtered with filter=" + titleToSearch);
+    // eslint-disable-next-line no-unneeded-ternary
+    getEvents(page, size, titleToSearch).then((result) => {
       changeTotal(result.data.pages);
       changeRows(result.data.data);
     });
   };
   React.useEffect(() => fetchData(page, rowsPerPage), []);
+  const fetchFiltered = (e) => {
+    changeSearch(e.target.value);
+    setPage(0);
+    fetchData(page, rowsPerPage, e.target.value);
+  };
 
+  const [openNewEventDialog, setOpenNewEventDialog] = React.useState(false);
+  const handleOpenNewEventDialog = () => {
+    setOpenNewEventDialog(true);
+  };
+
+  const handleCloseNewEventDialog = (value) => {
+    setOpenNewEventDialog(false);
+  };
+  const [opened, setOpened] = React.useState(false);
+
+  const handleClick = () => {
+    console.log("snackabar");
+    setOpened(true);
+  };
+
+  const handleClose = (event, reason) => {
+    if (reason === "clickaway") {
+      return;
+    }
+
+    setOpened(false);
+  };
+  const [msg, changeMsg] = React.useState("-");
+  const [severity, changeSeverity] = React.useState("success");
   return (
     rows && (
       <Box sx={{ width: "100%" }}>
+        <Snackbar open={opened} autoHideDuration={5000} onClose={handleClose}>
+          <Alert
+            onClose={handleClose}
+            severity={severity}
+            sx={{ width: "100%" }}
+          >
+            {t(msg)}
+          </Alert>
+        </Snackbar>
+        <Dialog
+          open={openNewEventDialog}
+          onClose={handleCloseNewEventDialog}
+          maxWidth="md"
+          fullWidth
+          className="new-event-dialog"
+        >
+          <DialogTitle>{t("createNewEvent")}</DialogTitle>
+          <Divider />
+          <DialogContent style={{ overflowY: "visible" }}>
+            <div className="form-wrapper">
+              <NewEventDialog returnData={returnNewEvent}></NewEventDialog>
+            </div>
+          </DialogContent>
+          <Divider />
+          <DialogActions>
+            <Button autoFocus onClick={() => handleCloseNewEventDialog()}>
+              {t("return")}
+            </Button>
+          </DialogActions>
+        </Dialog>
         <Paper sx={{ width: "100%", mb: 2 }}>
-          <EnhancedTableToolbar></EnhancedTableToolbar>
+          <Toolbar
+            sx={{
+              pl: { sm: 2 },
+              pr: { xs: 1, sm: 1 },
+
+              bgcolor: "#d0dbe0",
+            }}
+          >
+            <Typography
+              sx={{ flex: "1 1 100%" }}
+              variant="h6"
+              id="tableTitle"
+              component="div"
+            >
+              {t("events")}
+            </Typography>
+            <TextField
+              id="outlined-search"
+              label={t("search")}
+              type="search"
+              size="small"
+              sx={{ marginRight: 10, width: 250, zIndex: "1" }}
+              onChange={fetchFiltered}
+            />
+            <Tooltip title={t("filter")}>
+              <IconButton>
+                <FilterListIcon color="secondary" />
+              </IconButton>
+            </Tooltip>
+            <Tooltip title={t("newEvent")}>
+              <IconButton onClick={() => handleOpenNewEventDialog()}>
+                <AddBoxTwoToneIcon color="success" />
+              </IconButton>
+            </Tooltip>
+          </Toolbar>
           <TableContainer>
             <Table sx={{ minWidth: 750 }} size="small">
               <EnhancedTableHead
@@ -257,7 +358,7 @@ export default function EventTable() {
                     );
                   }
                 )}
-                {emptyRows > 0 && (
+                {/* {emptyRows > 0 && (
                   <TableRow
                     style={{
                       height: 53 * emptyRows,
@@ -265,7 +366,7 @@ export default function EventTable() {
                   >
                     <TableCell colSpan={6} />
                   </TableRow>
-                )}
+                )} */}
               </TableBody>
             </Table>
           </TableContainer>
@@ -289,10 +390,15 @@ export default function EventTable() {
     )
   );
 }
+const Alert = React.forwardRef(function Alert(props, ref) {
+  return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+});
 function Row(props) {
+  const [messageApi, contextHolder] = message.useMessage();
   const { row } = props;
   const [open, setOpen] = React.useState(false);
   const { t } = useTranslation();
+  const [changed, changeChanged] = React.useState(false);
   const contentStyle = {
     margin: "auto",
     height: "405px",
@@ -304,15 +410,117 @@ function Row(props) {
     maxHeight: "100%",
     borderRadius: "40px",
   };
+  const [deEvent, changeDeEvent] = React.useState(-1);
+  const deleteClick = (row) => {
+    deleteEvent(JSON.parse(sessionStorage.getItem("user")).user.id, row.id)
+      .catch(() => {
+        messageApi.open({
+          type: "error",
+          content: t("notDeletedEvent"),
+          duration: 0,
+        });
+        setTimeout(messageApi.destroy, 3000);
+      })
+      .then(() => {
+        row.active = false;
+        changeChanged(!changed);
+        changeDeEvent(row.id);
+        changeMsg("deletedEvent");
+        changeSeverity("success");
+        handleClick();
+      });
+  };
+  const [opened, setOpened] = React.useState(false);
+
+  const handleClick = () => {
+    console.log("snackabar");
+    setOpened(true);
+  };
+
+  const handleClose = (event, reason) => {
+    if (reason === "clickaway") {
+      return;
+    }
+
+    setOpened(false);
+  };
+  const [msg, changeMsg] = React.useState("-");
+  const [severity, changeSeverity] = React.useState("success");
+  const handleUndo = () => {
+    activateEvent(JSON.parse(sessionStorage.getItem("user")).user.id, deEvent)
+      .catch(() => {
+        changeDeEvent(-1);
+      })
+      .then(() => {
+        changeDeEvent(-1);
+      });
+    handleClose();
+  };
+  const [openDialog, setOpenDialog] = React.useState(false);
+  const handleOpenDialog = () => {
+    setOpenDialog(true);
+  };
+  const returnUpdateEvent = (data) => {
+    if (data === "error") {
+      changeMsg("eventNotUpdated");
+      changeSeverity("error");
+    } else {
+      console.log("updated event:");
+      console.log(data);
+      // izmijeniti event na frontednu
+
+      changeMsg("eventUpdated");
+      changeSeverity("success");
+    }
+    handleClick();
+  };
+  const handleCloseDialog = (value) => {
+    setOpenDialog(false);
+  };
+  const [openUpdateEventDialog, setOpenUpdateEventDialog] =
+    React.useState(false);
+  const handleOpenUpdateEventDialog = () => {
+    setOpenUpdateEventDialog(true);
+  };
+
+  const handleCloseUpdateEventDialog = (value) => {
+    setOpenUpdateEventDialog(false);
+  };
   return (
     <React.Fragment>
+      {contextHolder}
+      <Snackbar open={opened} autoHideDuration={10000} onClose={handleClose}>
+        <Alert onClose={handleClose} severity={severity} sx={{ width: "100%" }}>
+          {t(msg)}
+          {msg === "deletedEvent" && (
+            <Button
+              sx={{ color: "yellow", marginLeft: 8 }}
+              size="small"
+              onClick={handleUndo}
+            >
+              {t("undo")}
+            </Button>
+          )}
+        </Alert>
+      </Snackbar>
+
       <TableRow sx={{ "& > *": { borderBottom: "unset" } }}>
-        <TableCell align="left">#{row.id}</TableCell>
-        <TableCell align="left">{row.title}</TableCell>
-        <TableCell align="left">{t(row.type)}</TableCell>
-        <TableCell align="left">{row.date}</TableCell>
-        <TableCell align="left">{t(row.creator.department.name)}</TableCell>
-        <TableCell align="left">
+        <TableCell align="left" sx={{ minWidth: "100px" }}>
+          #{row.id}
+        </TableCell>
+        <TableCell align="left" sx={{ minWidth: "150px", maxWidth: "320px" }}>
+          {row.title}
+        </TableCell>
+        <TableCell align="left" sx={{ minWidth: "150px" }}>
+          {t(row.type)}
+        </TableCell>
+        <TableCell align="left" sx={{ minWidth: "170px" }}>
+          {row.date}
+        </TableCell>
+        <TableCell align="left" sx={{ minWidth: "200px" }}>
+          {t(row.creator.department.name)}
+        </TableCell>
+        <TableCell align="left" sx={{ minWidth: "100px" }}>
           {row.active === true ? t("active") : t("inactive")}
         </TableCell>
         <TableCell>
@@ -331,6 +539,7 @@ function Row(props) {
             <Box>
               <div id="flex-column-container">
                 <div className="flex-div half-width">
+                  <p className="event-title">{row.title}</p>
                   <p className="event-info">
                     <InfoTwoToneIcon sx={{ fontSize: 30 }} color="success" />{" "}
                     {row.description}
@@ -351,17 +560,29 @@ function Row(props) {
                   </p>
                   <Divider />
                   <div className="controls">
-                    <IconButton color="primary" sx={{ fontSize: 37 }}>
+                    <IconButton
+                      color="primary"
+                      sx={{ fontSize: 37 }}
+                      onClick={() => handleOpenDialog()}
+                    >
                       <LocationOnTwoToneIcon fontSize="inherit" />
                     </IconButton>
                     {row.creator.id ===
                       JSON.parse(sessionStorage.getItem("user")).user.id &&
                       row.active && (
                         <>
-                          <IconButton color="success" sx={{ fontSize: 37 }}>
+                          <IconButton
+                            color="success"
+                            sx={{ fontSize: 37 }}
+                            onClick={() => handleOpenUpdateEventDialog(row)}
+                          >
                             <SettingsTwoToneIcon fontSize="inherit" />
                           </IconButton>
-                          <IconButton color="error" sx={{ fontSize: 37 }}>
+                          <IconButton
+                            color="error"
+                            sx={{ fontSize: 37 }}
+                            onClick={() => deleteClick(row)}
+                          >
                             <DeleteIcon fontSize="inherit" />
                           </IconButton>
                         </>
@@ -372,7 +593,6 @@ function Row(props) {
                   {row.images.length > 0 ? (
                     <Carousel>
                       {row.images.map((img) => {
-                        console.log(img);
                         return (
                           <div key={img.id}>
                             <img
@@ -399,6 +619,49 @@ function Row(props) {
                     {row.info && row.info !== "" ? row.info : t("noAddInfo")}
                   </p>
                 </div>
+                <Dialog
+                  open={openDialog}
+                  onClose={handleCloseDialog}
+                  maxWidth="md"
+                  fullWidth
+                >
+                  <DialogTitle>{t("location")}</DialogTitle>
+                  <Divider />
+                  <EventLocation event={row}></EventLocation>
+                  <Divider />
+                  <DialogActions>
+                    <Button autoFocus onClick={() => handleCloseDialog()}>
+                      {t("return")}
+                    </Button>
+                  </DialogActions>
+                </Dialog>
+                <Dialog
+                  open={openUpdateEventDialog}
+                  onClose={handleCloseUpdateEventDialog}
+                  maxWidth="md"
+                  fullWidth
+                  className="update-event-dialog"
+                >
+                  <DialogTitle>{t("updateEvent")}</DialogTitle>
+                  <Divider />
+                  <DialogContent style={{ overflowY: "visible" }}>
+                    <div className="form-wrapper">
+                      <UpdateEvent
+                        returnData={returnUpdateEvent}
+                        event={row}
+                      ></UpdateEvent>
+                    </div>
+                  </DialogContent>
+                  <Divider />
+                  <DialogActions>
+                    <Button
+                      autoFocus
+                      onClick={() => handleCloseUpdateEventDialog()}
+                    >
+                      {t("return")}
+                    </Button>
+                  </DialogActions>
+                </Dialog>
               </div>
             </Box>
           </Collapse>
