@@ -15,7 +15,7 @@ export function NewEventDialog(props) {
   const { TextArea } = Input;
   let ident = Math.floor(Math.random() * 1000000 + 1);
   let position = null;
-  let type = null;
+  let type = "INFO";
   const changePosition = (pos) => {
     position = pos;
   };

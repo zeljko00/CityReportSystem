@@ -58,70 +58,71 @@ import { UpdateEvent } from "../components/UpdateEvent";
 import DialogContent from "@mui/material/DialogContent";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
-function descendingComparator(a, b, orderBy) {
-  if (orderBy === "date") {
-    const tokensA = a[orderBy].split(" ");
-    const dateTokensA = tokensA[0].split(".");
-    const timeTokensA = tokensA[1].split(":");
-    const tokensB = b[orderBy].split(" ");
-    const dateTokensB = tokensB[0].split(".");
-    const timeTokensB = tokensB[1].split(":");
-    console.log(tokensA);
-    const dateA = new Date(
-      dateTokensA[2],
-      dateTokensA[1] - 1,
-      dateTokensA[0],
-      timeTokensA[0],
-      timeTokensA[1],
-      timeTokensA[2]
-    );
-    const dateB = new Date(
-      dateTokensB[2],
-      dateTokensB[1] - 1,
-      dateTokensB[0],
-      timeTokensB[0],
-      timeTokensB[1],
-      timeTokensB[2]
-    );
-    console.log(dateA);
-    console.log(dateA.getTime());
-    console.log(dateB.getTime());
-    if (dateB.getTime() < dateA.getTime()) return -1;
-    else if (dateB.getTime() > dateA.getTime()) return 1;
-    else return 0;
-  } else {
-    if (b[orderBy] < a[orderBy]) {
-      return -1;
-    }
-    if (b[orderBy] > a[orderBy]) {
-      return 1;
-    }
-    return 0;
-  }
-}
+// function descendingComparator(a, b, orderBy) {
+//   if (orderBy === "date") {
+//     const tokensA = a[orderBy].split(" ");
+//     const dateTokensA = tokensA[0].split(".");
+//     const timeTokensA = tokensA[1].split(":");
+//     const tokensB = b[orderBy].split(" ");
+//     const dateTokensB = tokensB[0].split(".");
+//     const timeTokensB = tokensB[1].split(":");
+//     console.log(tokensA);
+//     const dateA = new Date(
+//       dateTokensA[2],
+//       dateTokensA[1] - 1,
+//       dateTokensA[0],
+//       timeTokensA[0],
+//       timeTokensA[1],
+//       timeTokensA[2]
+//     );
+//     const dateB = new Date(
+//       dateTokensB[2],
+//       dateTokensB[1] - 1,
+//       dateTokensB[0],
+//       timeTokensB[0],
+//       timeTokensB[1],
+//       timeTokensB[2]
+//     );
+//     console.log(dateA);
+//     console.log(dateA.getTime());
+//     console.log(dateB.getTime());
+//     if (dateB.getTime() < dateA.getTime()) return -1;
+//     else if (dateB.getTime() > dateA.getTime()) return 1;
+//     else return 0;
+//   } else {
+//     if (b[orderBy] < a[orderBy]) {
+//       return -1;
+//     }
+//     if (b[orderBy] > a[orderBy]) {
+//       return 1;
+//     }
+//     return 0;
+//   }
+// }
 
-function getComparator(order, orderBy) {
-  return order === "desc"
-    ? (a, b) => descendingComparator(a, b, orderBy)
-    : (a, b) => -descendingComparator(a, b, orderBy);
-}
+// function getComparator(order, orderBy) {
+//   return order === "desc"
+//     ? (a, b) => descendingComparator(a, b, orderBy)
+//     : (a, b) => -descendingComparator(a, b, orderBy);
+// }
 
-function stableSort(array, comparator) {
-  const stabilizedThis = array.map((el, index) => [el, index]);
-  stabilizedThis.sort((a, b) => {
-    const order = comparator(a[0], b[0]);
-    if (order !== 0) {
-      return order;
-    }
-    return a[1] - b[1];
-  });
-  return stabilizedThis.map((el) => el[0]);
-}
+// function stableSort(array, comparator) {
+//   const stabilizedThis = array.map((el, index) => [el, index]);
+//   stabilizedThis.sort((a, b) => {
+//     const order = comparator(a[0], b[0]);
+//     if (order !== 0) {
+//       return order;
+//     }
+//     return a[1] - b[1];
+//   });
+//   return stabilizedThis.map((el) => el[0]);
+// }
 
 export function EnhancedTableHead(props) {
   const { order, orderBy, onRequestSort } = props;
   const createSortHandler = (property) => (event) => {
-    onRequestSort(event, property);
+    console.log("sorting" + property);
+    onRequestSort(property);
   };
   const { t } = useTranslation();
 
@@ -225,7 +226,7 @@ export default function EventTable() {
   const [rows, changeRows] = React.useState([]);
   const { t } = useTranslation();
   const [order, setOrder] = React.useState("desc");
-  const [orderBy, setOrderBy] = React.useState("active");
+  const [orderBy, setOrderBy] = React.useState("date");
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
   const [total, changeTotal] = React.useState(-1);
@@ -238,49 +239,47 @@ export default function EventTable() {
   const [servicesList, changeServicesList] = React.useState([]);
   const [eventTypes, changeEventTypes] = React.useState([]);
 
-  const resetFilters = () => {
-    changeTypeFilter("all");
-    changeStateFilter("all");
-    changeDepartmentFilter("all");
-  };
-  // eslint-disable-next-line no-unused-vars
-  const [filter, changeFilter] = React.useState("all");
-  // eslint-disable-next-line no-unused-vars
-  const [filterValue, changeFilterValue] = React.useState("all");
-  // const debugFilters = () => {
-  //   console.log("=================================0");
-  //   console.log("type: " + typeFilter);
-  //   console.log("state: " + stateFilter);
-  //   console.log("departmetn: " + departmentFilter);
-  //   console.log("filter type: " + filter);
-  //   console.log("filter value: " + filterValue);
-  // };
-  const filtering = (filter, filterValue) => {
-    changeFilter(filter);
-    changeFilterValue(filterValue);
-    fetchData(0, rowsPerPage, search, filter, filterValue);
-    setPage(0);
-  };
   const handleChangeTypeFilter = (event) => {
-    resetFilters();
-    if (event.target.value !== "all") {
-      changeTypeFilter(event.target.value);
-      filtering("type", event.target.value);
-    } else filtering("all", "all");
+    changeTypeFilter(event.target.value);
+    setPage(0);
+    fetchData(
+      0,
+      rowsPerPage,
+      search,
+      event.target.value,
+      stateFilter,
+      departmentFilter,
+      orderBy,
+      order
+    );
   };
   const handleChangeStateFilter = (event) => {
-    resetFilters();
-    if (event.target.value !== "all") {
-      changeStateFilter(event.target.value);
-      filtering("active", event.target.value);
-    } else filtering("all", "all");
+    changeStateFilter(event.target.value);
+    setPage(0);
+    fetchData(
+      0,
+      rowsPerPage,
+      search,
+      typeFilter,
+      event.target.value,
+      departmentFilter,
+      orderBy,
+      order
+    );
   };
   const handleChangeDepartmentFilter = (event) => {
-    resetFilters();
-    if (event.target.value !== "all") {
-      changeDepartmentFilter(event.target.value);
-      filtering("department", event.target.value);
-    } else filtering("all", "all");
+    setPage(0);
+    changeDepartmentFilter(event.target.value);
+    fetchData(
+      0,
+      rowsPerPage,
+      search,
+      typeFilter,
+      stateFilter,
+      event.target.value,
+      orderBy,
+      order
+    );
   };
 
   // const [sort, changeSort] = React.useState("date");
@@ -308,39 +307,94 @@ export default function EventTable() {
     }
     handleClick();
   };
-  const handleRequestSort = (event, property) => {
+  const handleRequestSort = (property) => {
     const isAsc = orderBy === property && order === "asc";
     setOrder(isAsc ? "desc" : "asc");
     setOrderBy(property);
+    fetchData(
+      page,
+      rowsPerPage,
+      search,
+      typeFilter,
+      stateFilter,
+      departmentFilter,
+      property,
+      isAsc ? "desc" : "asc"
+    );
   };
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
-    fetchData(newPage, rowsPerPage, search, filter, filterValue);
+    fetchData(
+      newPage,
+      rowsPerPage,
+      search,
+      typeFilter,
+      stateFilter,
+      departmentFilter,
+      orderBy,
+      order
+    );
   };
 
   const handleChangeRowsPerPage = (event) => {
     const n = parseInt(event.target.value, 10);
     setRowsPerPage(n);
     setPage(0);
-    fetchData(0, n, search, filter, filterValue);
+    fetchData(
+      0,
+      n,
+      search,
+      typeFilter,
+      stateFilter,
+      departmentFilter,
+      orderBy,
+      order
+    );
   };
 
   //  Avoid a layout jump when reaching the last page with empty rows.
   // const emptyRows =
   //   page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0;
-  const fetchData = (page, size, search, filter, filterValue) => {
+  const fetchData = (
+    page,
+    size,
+    search,
+    typeFilter,
+    stateFilter,
+    departmentFilter,
+    orderBy,
+    order
+  ) => {
     const titleToSearch =
       search !== undefined && search != null && search !== "" ? search : "-";
     console.log("fetch filtered with filter=" + titleToSearch);
     // eslint-disable-next-line no-unneeded-ternary
-    getEvents(page, size, titleToSearch, filter, filterValue).then((result) => {
+    getEvents(
+      page,
+      size,
+      titleToSearch,
+      typeFilter,
+      stateFilter,
+      departmentFilter,
+      orderBy,
+      order
+    ).then((result) => {
       changeTotal(result.data.pages);
       changeRows(result.data.data);
     });
   };
   React.useEffect(() => {
-    fetchData(page, rowsPerPage, search, filter, filterValue);
+    fetchData(
+      page,
+      rowsPerPage,
+      search,
+      typeFilter,
+      stateFilter,
+      departmentFilter,
+      orderBy,
+      order
+    );
     getServices()
       .catch()
       .then((response) => {
@@ -355,7 +409,16 @@ export default function EventTable() {
   const fetchFiltered = (e) => {
     changeSearch(e.target.value);
     setPage(0);
-    fetchData(0, rowsPerPage, e.target.value, filter, filterValue);
+    fetchData(
+      0,
+      rowsPerPage,
+      e.target.value,
+      typeFilter,
+      stateFilter,
+      departmentFilter,
+      orderBy,
+      order
+    );
   };
 
   const [openNewEventDialog, setOpenNewEventDialog] = React.useState(false);
@@ -525,13 +588,11 @@ export default function EventTable() {
                 rowCount={rows.length}
               />
               <TableBody>
-                {stableSort(rows, getComparator(order, orderBy)).map(
-                  (row, index) => {
-                    return (
-                      <Row key={row.id} row={row} className="body-row"></Row>
-                    );
-                  }
-                )}
+                {rows.map((row, index) => {
+                  return (
+                    <Row key={row.id} row={row} className="body-row"></Row>
+                  );
+                })}
                 {/* {emptyRows > 0 && (
                   <TableRow
                     style={{

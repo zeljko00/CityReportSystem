@@ -5,18 +5,33 @@ export function getActiveEvents() {
     headers: { "Content-Type": "application/json" },
   });
 }
-export function getEvents(page, size, search, filter, filterValue) {
+export function getEvents(
+  page,
+  size,
+  search,
+  typeFilter,
+  stateFilter,
+  departmentFilter,
+  sort,
+  dir
+) {
   return axios.get(
     "/CityReportSystem/events/" +
-      filter +
+      typeFilter +
       "/" +
-      filterValue +
+      stateFilter +
+      "/" +
+      departmentFilter +
       "/" +
       page +
       "/" +
       size +
       "/" +
-      search,
+      search +
+      "/" +
+      sort +
+      "/" +
+      dir,
     {
       headers: { "Content-Type": "application/json" },
     }
