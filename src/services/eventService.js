@@ -5,13 +5,27 @@ export function getActiveEvents() {
     headers: { "Content-Type": "application/json" },
   });
 }
-export function getEvents(page, size, search) {
+export function getEvents(page, size, search, filter, filterValue) {
   return axios.get(
-    "/CityReportSystem/events/" + page + "/" + size + "/" + search,
+    "/CityReportSystem/events/" +
+      filter +
+      "/" +
+      filterValue +
+      "/" +
+      page +
+      "/" +
+      size +
+      "/" +
+      search,
     {
       headers: { "Content-Type": "application/json" },
     }
   );
+}
+export function getTypes() {
+  return axios.get("/CityReportSystem/events/types", {
+    headers: { "Content-Type": "application/json" },
+  });
 }
 export function deleteEvent(executorId, id) {
   return axios.delete(
@@ -62,6 +76,40 @@ export function uploadImage(image, id) {
   try {
     axios
       .post("/CityReportSystem/events/images/upload", fmData, config)
+      .then(() => {
+        onSuccess("Ok");
+      });
+  } catch (err) {
+    console.log("Error: ", err);
+    onError({ err });
+  }
+}
+export function deleteUpdatedImage(id) {
+  return axios.delete("/CityReportSystem/events/images/update/" + id, {
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+}
+export function updateImage(image, id) {
+  const { onSuccess, onError, file, onProgress } = image;
+  console.log("uploading");
+  console.log(file);
+  const fmData = new FormData();
+  const config = {
+    headers: { "content-type": "multipart/form-data" },
+    onUploadProgress: (event) => {
+      onProgress({ percent: (event.loaded / event.total) * 100 });
+    },
+  };
+  fmData.append("image", file);
+  try {
+    axios
+      .post(
+        "/CityReportSystem/events/images/upload/" + id + "--" + file.name,
+        fmData,
+        config
+      )
       .then(() => {
         onSuccess("Ok");
       });

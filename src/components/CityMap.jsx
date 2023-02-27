@@ -203,10 +203,10 @@ function addMarkers(title, desc, info, date, x, y, type, creator, images, t) {
       : "../assets/images/work.png"),
     iconSize:
       type === "WORK_IN_PROGRESS"
-        ? [37, 37]
+        ? [25, 25]
         : type === "INFO"
-        ? [32, 32]
-        : [53, 43],
+        ? [20, 20]
+        : [40, 27],
   });
   return (
     <Marker position={[x, y]} icon={markerIcon}>
@@ -253,7 +253,7 @@ function addMarkers(title, desc, info, date, x, y, type, creator, images, t) {
                   <div key={img.id}>
                     <img
                       src={
-                        "http://192.168.100.8:8080/CityReportSystem/events/active/images/" +
+                        "http://localhost:8080/CityReportSystem/events/active/images/" +
                         img.id
                       }
                       style={contentStyle}

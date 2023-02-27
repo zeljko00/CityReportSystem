@@ -8,6 +8,9 @@ import TableHead from "@mui/material/TableHead";
 import TablePagination from "@mui/material/TablePagination";
 import TableRow from "@mui/material/TableRow";
 import TableSortLabel from "@mui/material/TableSortLabel";
+import FormControl from "@mui/material/FormControl";
+import InputLabel from "@mui/material/InputLabel";
+import Select from "@mui/material/Select";
 import Paper from "@mui/material/Paper";
 import TableCell from "@mui/material/TableCell";
 import { visuallyHidden } from "@mui/utils";
@@ -16,7 +19,9 @@ import {
   getEvents,
   deleteEvent,
   activateEvent,
+  getTypes,
 } from "../services/eventService";
+import { getServices } from "../services/cityServices.service";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import Typography from "@mui/material/Typography";
@@ -51,6 +56,8 @@ import DialogActions from "@mui/material/DialogActions";
 import { NewEventDialog } from "../components/NewEventDialog";
 import { UpdateEvent } from "../components/UpdateEvent";
 import DialogContent from "@mui/material/DialogContent";
+import Menu from "@mui/material/Menu";
+import MenuItem from "@mui/material/MenuItem";
 function descendingComparator(a, b, orderBy) {
   if (orderBy === "date") {
     const tokensA = a[orderBy].split(" ");
@@ -117,6 +124,7 @@ export function EnhancedTableHead(props) {
     onRequestSort(event, property);
   };
   const { t } = useTranslation();
+
   const headCells = [
     {
       id: "id",
@@ -124,6 +132,7 @@ export function EnhancedTableHead(props) {
       disablePadding: false,
       label: t("eventId"),
       icon: FingerprintTwoToneIcon,
+      sort: true,
     },
     {
       id: "title",
@@ -131,6 +140,7 @@ export function EnhancedTableHead(props) {
       disablePadding: false,
       label: t("eventTitle"),
       icon: "-",
+      sort: true,
     },
     {
       id: "type",
@@ -138,6 +148,7 @@ export function EnhancedTableHead(props) {
       disablePadding: false,
       label: t("eventType"),
       icon: ReceiptLongTwoToneIcon,
+      sort: false,
     },
     {
       id: "date",
@@ -145,6 +156,7 @@ export function EnhancedTableHead(props) {
       disablePadding: false,
       label: t("eventDate"),
       icon: CalendarMonthIconTwoTone,
+      sort: true,
     },
     {
       id: "creator.department.name",
@@ -152,6 +164,7 @@ export function EnhancedTableHead(props) {
       disablePadding: false,
       label: t("eventCreator"),
       icon: SupervisorAccountTwoToneIcon,
+      sort: false,
     },
     {
       id: "active",
@@ -159,6 +172,7 @@ export function EnhancedTableHead(props) {
       disablePadding: false,
       label: t("eventState"),
       icon: VerifiedTwoToneIcon,
+      sort: false,
     },
   ];
   return (
@@ -171,19 +185,28 @@ export function EnhancedTableHead(props) {
             padding={headCell.disablePadding ? "none" : "normal"}
             sortDirection={orderBy === headCell.id ? order : false}
           >
-            <TableSortLabel
-              active={orderBy === headCell.id}
-              direction={orderBy === headCell.id ? order : "asc"}
-              onClick={createSortHandler(headCell.id)}
-            >
-              {headCell.icon !== "-" && <headCell.icon />}
-              {headCell.label}
-              {orderBy === headCell.id ? (
-                <Box component="span" sx={visuallyHidden}>
-                  {order === "desc" ? "sorted descending" : "sorted ascending"}
-                </Box>
-              ) : null}
-            </TableSortLabel>
+            {headCell.sort ? (
+              <TableSortLabel
+                active={orderBy === headCell.id}
+                direction={orderBy === headCell.id ? order : "asc"}
+                onClick={createSortHandler(headCell.id)}
+              >
+                {headCell.icon !== "-" && <headCell.icon />}
+                {headCell.label}
+                {orderBy === headCell.id ? (
+                  <Box component="span" sx={visuallyHidden}>
+                    {order === "desc"
+                      ? "sorted descending"
+                      : "sorted ascending"}
+                  </Box>
+                ) : null}
+              </TableSortLabel>
+            ) : (
+              <>
+                {headCell.icon !== "-" && <headCell.icon />}
+                {headCell.label}
+              </>
+            )}
           </TableCell>
         ))}
         <TableCell align="right" sx={{ width: 30 }} />
@@ -207,6 +230,62 @@ export default function EventTable() {
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
   const [total, changeTotal] = React.useState(-1);
   const [search, changeSearch] = React.useState("");
+
+  const [typeFilter, changeTypeFilter] = React.useState("all");
+  const [stateFilter, changeStateFilter] = React.useState("all");
+  const [departmentFilter, changeDepartmentFilter] = React.useState("all");
+
+  const [servicesList, changeServicesList] = React.useState([]);
+  const [eventTypes, changeEventTypes] = React.useState([]);
+
+  const resetFilters = () => {
+    changeTypeFilter("all");
+    changeStateFilter("all");
+    changeDepartmentFilter("all");
+  };
+  // eslint-disable-next-line no-unused-vars
+  const [filter, changeFilter] = React.useState("all");
+  // eslint-disable-next-line no-unused-vars
+  const [filterValue, changeFilterValue] = React.useState("all");
+  // const debugFilters = () => {
+  //   console.log("=================================0");
+  //   console.log("type: " + typeFilter);
+  //   console.log("state: " + stateFilter);
+  //   console.log("departmetn: " + departmentFilter);
+  //   console.log("filter type: " + filter);
+  //   console.log("filter value: " + filterValue);
+  // };
+  const filtering = (filter, filterValue) => {
+    changeFilter(filter);
+    changeFilterValue(filterValue);
+    fetchData(0, rowsPerPage, search, filter, filterValue);
+    setPage(0);
+  };
+  const handleChangeTypeFilter = (event) => {
+    resetFilters();
+    if (event.target.value !== "all") {
+      changeTypeFilter(event.target.value);
+      filtering("type", event.target.value);
+    } else filtering("all", "all");
+  };
+  const handleChangeStateFilter = (event) => {
+    resetFilters();
+    if (event.target.value !== "all") {
+      changeStateFilter(event.target.value);
+      filtering("active", event.target.value);
+    } else filtering("all", "all");
+  };
+  const handleChangeDepartmentFilter = (event) => {
+    resetFilters();
+    if (event.target.value !== "all") {
+      changeDepartmentFilter(event.target.value);
+      filtering("department", event.target.value);
+    } else filtering("all", "all");
+  };
+
+  // const [sort, changeSort] = React.useState("date");
+  // const [sortValue, changeSortValue] = React.useState("asc");
+
   const returnNewEvent = (data) => {
     if (data === "error") {
       changeMsg("eventNotCreated");
@@ -237,34 +316,46 @@ export default function EventTable() {
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
-    fetchData(newPage, rowsPerPage, search);
+    fetchData(newPage, rowsPerPage, search, filter, filterValue);
   };
 
   const handleChangeRowsPerPage = (event) => {
     const n = parseInt(event.target.value, 10);
     setRowsPerPage(n);
     setPage(0);
-    fetchData(0, n, search);
+    fetchData(0, n, search, filter, filterValue);
   };
 
   //  Avoid a layout jump when reaching the last page with empty rows.
   // const emptyRows =
   //   page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0;
-  const fetchData = (page, size, search) => {
+  const fetchData = (page, size, search, filter, filterValue) => {
     const titleToSearch =
       search !== undefined && search != null && search !== "" ? search : "-";
     console.log("fetch filtered with filter=" + titleToSearch);
     // eslint-disable-next-line no-unneeded-ternary
-    getEvents(page, size, titleToSearch).then((result) => {
+    getEvents(page, size, titleToSearch, filter, filterValue).then((result) => {
       changeTotal(result.data.pages);
       changeRows(result.data.data);
     });
   };
-  React.useEffect(() => fetchData(page, rowsPerPage), []);
+  React.useEffect(() => {
+    fetchData(page, rowsPerPage, search, filter, filterValue);
+    getServices()
+      .catch()
+      .then((response) => {
+        changeServicesList(response.data);
+      });
+    getTypes()
+      .catch()
+      .then((response) => {
+        changeEventTypes(response.data);
+      });
+  }, []);
   const fetchFiltered = (e) => {
     changeSearch(e.target.value);
     setPage(0);
-    fetchData(page, rowsPerPage, e.target.value);
+    fetchData(0, rowsPerPage, e.target.value, filter, filterValue);
   };
 
   const [openNewEventDialog, setOpenNewEventDialog] = React.useState(false);
@@ -291,8 +382,18 @@ export default function EventTable() {
   };
   const [msg, changeMsg] = React.useState("-");
   const [severity, changeSeverity] = React.useState("success");
+
+  const [anchorEl, setAnchorEl] = React.useState(null);
+  const open = Boolean(anchorEl);
+  const handleClickMenu = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+  const handleCloseMenu = () => {
+    setAnchorEl(null);
+  };
   return (
-    rows && (
+    rows &&
+    servicesList && (
       <Box sx={{ width: "100%" }}>
         <Snackbar open={opened} autoHideDuration={5000} onClose={handleClose}>
           <Alert
@@ -350,10 +451,65 @@ export default function EventTable() {
               onChange={fetchFiltered}
             />
             <Tooltip title={t("filter")}>
-              <IconButton>
+              <IconButton onClick={handleClickMenu}>
                 <FilterListIcon color="secondary" />
               </IconButton>
             </Tooltip>
+            <Menu
+              id="basic-menu"
+              anchorEl={anchorEl}
+              open={open}
+              onClose={handleCloseMenu}
+              MenuListProps={{
+                "aria-labelledby": "basic-button",
+              }}
+            >
+              <FormControl variant="standard" sx={{ m: 1, minWidth: 170 }}>
+                <InputLabel id="demo-simple-select-standard-label">
+                  {t("eventType")}
+                </InputLabel>
+                <Select value={typeFilter} onChange={handleChangeTypeFilter}>
+                  <MenuItem value="all">{t("all")}</MenuItem>
+                  {eventTypes.map((et) => {
+                    return (
+                      <MenuItem key={et} value={et}>
+                        {t(et)}
+                      </MenuItem>
+                    );
+                  })}
+                </Select>
+              </FormControl>
+              <br />
+              <FormControl variant="standard" sx={{ m: 1, minWidth: 170 }}>
+                <InputLabel id="demo-simple-select-standard-label">
+                  {t("eventState")}
+                </InputLabel>
+                <Select value={stateFilter} onChange={handleChangeStateFilter}>
+                  <MenuItem value="all">{t("all")}</MenuItem>
+                  <MenuItem value="true">{t("active")}</MenuItem>
+                  <MenuItem value="false">{t("inactive")}</MenuItem>
+                </Select>
+              </FormControl>
+              <br />
+              <FormControl variant="standard" sx={{ m: 1, minWidth: 170 }}>
+                <InputLabel id="demo-simple-select-standard-label">
+                  {t("department")}
+                </InputLabel>
+                <Select
+                  value={departmentFilter}
+                  onChange={handleChangeDepartmentFilter}
+                >
+                  <MenuItem value="all">{t("all")}</MenuItem>
+                  {servicesList.map((ss) => {
+                    return (
+                      <MenuItem key={ss} value={ss}>
+                        {t(ss)}
+                      </MenuItem>
+                    );
+                  })}
+                </Select>
+              </FormControl>
+            </Menu>
             <Tooltip title={t("newEvent")}>
               <IconButton onClick={() => handleOpenNewEventDialog()}>
                 <AddBoxTwoToneIcon color="success" />
@@ -421,7 +577,6 @@ function Row(props) {
     margin: "auto",
     width: "100%",
     color: "#fff",
-    lineHeight: "380px",
     textAlign: "center",
     background: "#364d79",
     maxWidth: "100%",
@@ -490,6 +645,7 @@ function Row(props) {
       row.x = data.x;
       row.y = data.y;
       row.description = data.description;
+      row.images = data.images;
 
       changeMsg("eventUpdated");
       changeSeverity("success");
@@ -613,7 +769,7 @@ function Row(props) {
                 </div>
                 <div className="flex-div half-width" id="gallery">
                   {row.images.length > 0 ? (
-                    <Carousel>
+                    <Carousel dotPosition="top">
                       {row.images.map((img) => {
                         return (
                           <div key={img.id} className="img-container">

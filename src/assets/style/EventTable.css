@@ -96,3 +96,6 @@ p{
     font-style: oblique;
     margin-bottom: 5px;
 }
+.filter-select{
+    min-width: 200px;
+}

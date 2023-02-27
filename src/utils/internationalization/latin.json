@@ -95,7 +95,7 @@
   "eventId": "Identifikator",
   "eventTitle": "Naslov",
   "eventType": "Tip dešavanja",
-  "eventState": "Stanje",
+  "eventState": "Активност",
   "eventDate": "Datum kreiranja",
   "active": "Aktivan",
   "inactive": "Neaktivan",

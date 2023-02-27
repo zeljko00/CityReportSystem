@@ -10,9 +10,10 @@ function EventLocation(props) {
   const { t } = useTranslation();
   const event = props.event;
   const pos = [];
-  props.event.coords.forEach((c) => {
-    pos.push([c.x, c.y]);
-  });
+  if (props.event.coords)
+    props.event.coords.forEach((c) => {
+      pos.push([c.x, c.y]);
+    });
 
   const polygon = [
     [44.8726118, 17.2588105],

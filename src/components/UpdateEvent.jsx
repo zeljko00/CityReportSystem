@@ -5,8 +5,8 @@ import LocationPicker from "../components/LocationPicker";
 import { useTranslation } from "react-i18next";
 import {
   updateEvent,
-  uploadImage,
-  deleteImage,
+  updateImage,
+  deleteUpdatedImage,
 } from "../services/eventService";
 import PropTypes from "prop-types";
 export function UpdateEvent(props) {
@@ -30,7 +30,7 @@ export function UpdateEvent(props) {
       updateEvent(JSON.parse(sessionStorage.getItem("user")).user.id, event)
         .then((response) => {
           form.resetFields();
-          props.returnData(event);
+          props.returnData(response.data);
         })
         .catch(() => {
           props.returnData("error");
@@ -71,9 +71,9 @@ export function UpdateEvent(props) {
       <Form.Item>
         {/* // izmijeniti */}
         <ImageUpload
-          identificator={event.id}
-          uploadImage={uploadImage}
-          deleteImage={deleteImage}
+          identificator={props.event.id}
+          uploadImage={updateImage}
+          deleteImage={deleteUpdatedImage}
         ></ImageUpload>
       </Form.Item>
       <Form.Item>
