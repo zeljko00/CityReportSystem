@@ -3,7 +3,11 @@ import { Button, Form, Input } from "antd";
 import ImageUpload from "../components/ImageUpload";
 import LocationPicker from "../components/LocationPicker";
 import { useTranslation } from "react-i18next";
-// import { createEvent } from "../services/eventService";
+import {
+  updateEvent,
+  uploadImage,
+  deleteImage,
+} from "../services/eventService";
 import PropTypes from "prop-types";
 export function UpdateEvent(props) {
   const { t } = useTranslation();
@@ -23,15 +27,14 @@ export function UpdateEvent(props) {
         event.y = position[1];
       }
       console.log(event);
-      props.returnData(event);
-      //   updateEvent(event)
-      //     .then((response) => {
-      //       form.resetFields();
-      //       props.returnData(response.data);
-      //     })
-      //     .catch(() => {
-      //       props.returnData("error");
-      //     });
+      updateEvent(JSON.parse(sessionStorage.getItem("user")).user.id, event)
+        .then((response) => {
+          form.resetFields();
+          props.returnData(event);
+        })
+        .catch(() => {
+          props.returnData("error");
+        });
     });
   };
 
@@ -67,7 +70,11 @@ export function UpdateEvent(props) {
       </Form.Item>
       <Form.Item>
         {/* // izmijeniti */}
-        <ImageUpload identificator="1"></ImageUpload>
+        <ImageUpload
+          identificator={event.id}
+          uploadImage={uploadImage}
+          deleteImage={deleteImage}
+        ></ImageUpload>
       </Form.Item>
       <Form.Item>
         <Button

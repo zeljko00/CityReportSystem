@@ -3,7 +3,6 @@ import { PlusOutlined } from "@ant-design/icons";
 import { Modal, Upload, message } from "antd";
 import { useTranslation } from "react-i18next";
 import PropTypes from "prop-types";
-import { uploadImage, deleteImage } from "../services/report.service";
 
 const getBase64 = (file) =>
   new Promise((resolve, reject) => {
@@ -35,12 +34,12 @@ const ImageUpload = (props) => {
     );
   };
   const upload = (options) => {
-    uploadImage(options, identificator);
+    props.uploadImage(options, identificator);
   };
   const removeImage = (data) => {
     console.log("removing");
     console.log(data);
-    deleteImage(identificator + "--" + data.name);
+    props.deleteImage(identificator + "--" + data.name);
   };
   const handleChange = ({ fileList: newFileList }) => {
     setFileList(newFileList);
@@ -88,6 +87,8 @@ const ImageUpload = (props) => {
 };
 ImageUpload.propTypes = {
   identificator: PropTypes.number,
+  uploadImage: PropTypes.func,
+  deleteImage: PropTypes.func,
 };
 
 export default ImageUpload;

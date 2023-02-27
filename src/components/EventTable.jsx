@@ -53,11 +53,29 @@ import { UpdateEvent } from "../components/UpdateEvent";
 import DialogContent from "@mui/material/DialogContent";
 function descendingComparator(a, b, orderBy) {
   if (orderBy === "date") {
-    const tokensA = a[orderBy].split(".");
-    const tokensB = b[orderBy].split(".");
+    const tokensA = a[orderBy].split(" ");
+    const dateTokensA = tokensA[0].split(".");
+    const timeTokensA = tokensA[1].split(":");
+    const tokensB = b[orderBy].split(" ");
+    const dateTokensB = tokensB[0].split(".");
+    const timeTokensB = tokensB[1].split(":");
     console.log(tokensA);
-    const dateA = new Date(tokensA[2], tokensA[1] - 1, tokensA[0], 0, 0, 0);
-    const dateB = new Date(tokensB[2], tokensB[1] - 1, tokensB[0], 0, 0, 0);
+    const dateA = new Date(
+      dateTokensA[2],
+      dateTokensA[1] - 1,
+      dateTokensA[0],
+      timeTokensA[0],
+      timeTokensA[1],
+      timeTokensA[2]
+    );
+    const dateB = new Date(
+      dateTokensB[2],
+      dateTokensB[1] - 1,
+      dateTokensB[0],
+      timeTokensB[0],
+      timeTokensB[1],
+      timeTokensB[2]
+    );
     console.log(dateA);
     console.log(dateA.getTime());
     console.log(dateB.getTime());
@@ -401,7 +419,7 @@ function Row(props) {
   const [changed, changeChanged] = React.useState(false);
   const contentStyle = {
     margin: "auto",
-    height: "405px",
+    width: "100%",
     color: "#fff",
     lineHeight: "380px",
     textAlign: "center",
@@ -453,6 +471,7 @@ function Row(props) {
       })
       .then(() => {
         changeDeEvent(-1);
+        row.active = true;
       });
     handleClose();
   };
@@ -467,7 +486,10 @@ function Row(props) {
     } else {
       console.log("updated event:");
       console.log(data);
-      // izmijeniti event na frontednu
+      row.info = data.info;
+      row.x = data.x;
+      row.y = data.y;
+      row.description = data.description;
 
       changeMsg("eventUpdated");
       changeSeverity("success");
@@ -594,10 +616,10 @@ function Row(props) {
                     <Carousel>
                       {row.images.map((img) => {
                         return (
-                          <div key={img.id}>
+                          <div key={img.id} className="img-container">
                             <img
                               src={
-                                "http://192.168.100.8:8080/CityReportSystem/events/active/images/" +
+                                "http://localhost:8080/CityReportSystem/events/active/images/" +
                                 img.id
                               }
                               style={contentStyle}

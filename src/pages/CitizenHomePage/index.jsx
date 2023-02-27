@@ -17,7 +17,6 @@ import { Tab, Box } from "@mui/material";
 import Badge from "@mui/material/Badge";
 import MailIcon from "@mui/icons-material/Mail";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
-
 import { Button, Form, Input, Select, message, Collapse, Carousel } from "antd";
 
 import { LanguageSelector } from "../../components/LanguageSelector";
@@ -35,6 +34,8 @@ import {
   postReport,
   getMyReports,
   getReportStates,
+  uploadImage,
+  deleteImage,
 } from "../../services/report.service";
 import obj from "../../../package.json";
 import { ReportAdditionalInfoForm } from "../../components/ReportAdditionalInfoForm";
@@ -413,7 +414,11 @@ export function CitizenHomePage() {
                     ></LocationPicker>
                   </Form.Item>
                   <Form.Item>
-                    <ImageUpload identificator={ident}></ImageUpload>
+                    <ImageUpload
+                      identificator={ident}
+                      uploadImage={uploadImage}
+                      deleteImage={deleteImage}
+                    ></ImageUpload>
                   </Form.Item>
                   <Form.Item>
                     <Button

@@ -3,7 +3,11 @@ import { Button, Form, Input, Radio } from "antd";
 import ImageUpload from "../components/ImageUpload";
 import LocationPicker from "../components/LocationPicker";
 import { useTranslation } from "react-i18next";
-import { createEvent } from "../services/eventService";
+import {
+  createEvent,
+  uploadImage,
+  deleteImage,
+} from "../services/eventService";
 import PropTypes from "prop-types";
 export function NewEventDialog(props) {
   const { t } = useTranslation();
@@ -99,7 +103,11 @@ export function NewEventDialog(props) {
         ></LocationPicker>
       </Form.Item>
       <Form.Item>
-        <ImageUpload identificator={ident}></ImageUpload>
+        <ImageUpload
+          identificator={ident}
+          uploadImage={uploadImage}
+          deleteImage={deleteImage}
+        ></ImageUpload>
       </Form.Item>
       <Form.Item>
         <Button
