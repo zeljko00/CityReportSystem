@@ -134,6 +134,7 @@ export function EnhancedTableHead(props) {
       label: t("eventId"),
       icon: FingerprintTwoToneIcon,
       sort: true,
+      color: "success",
     },
     {
       id: "title",
@@ -192,7 +193,7 @@ export function EnhancedTableHead(props) {
                 direction={orderBy === headCell.id ? order : "asc"}
                 onClick={createSortHandler(headCell.id)}
               >
-                {headCell.icon !== "-" && <headCell.icon />}
+                {headCell.icon !== "-" && <headCell.icon color="success" />}
                 {headCell.label}
                 {orderBy === headCell.id ? (
                   <Box component="span" sx={visuallyHidden}>
@@ -204,7 +205,7 @@ export function EnhancedTableHead(props) {
               </TableSortLabel>
             ) : (
               <>
-                {headCell.icon !== "-" && <headCell.icon />}
+                {headCell.icon !== "-" && <headCell.icon color="primary" />}
                 {headCell.label}
               </>
             )}
@@ -510,12 +511,12 @@ export default function EventTable() {
               label={t("search")}
               type="search"
               size="small"
-              sx={{ marginRight: 10, width: 250, zIndex: "1" }}
+              sx={{ marginRight: 5, width: 250, zIndex: "1" }}
               onChange={fetchFiltered}
             />
             <Tooltip title={t("filter")}>
               <IconButton onClick={handleClickMenu}>
-                <FilterListIcon color="secondary" />
+                <FilterListIcon color="primary" />
               </IconButton>
             </Tooltip>
             <Menu
@@ -707,7 +708,7 @@ function Row(props) {
       row.y = data.y;
       row.description = data.description;
       row.images = data.images;
-
+      changeChanged(!changed);
       changeMsg("eventUpdated");
       changeSeverity("success");
     }

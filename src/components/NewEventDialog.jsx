@@ -1,7 +1,9 @@
-import * as React from "react";
+import React from "react";
 import { Button, Form, Input, Radio } from "antd";
 import ImageUpload from "../components/ImageUpload";
+// eslint-disable-next-line no-unused-vars
 import LocationPicker from "../components/LocationPicker";
+import AreaPicker from "../components/AreaPicker";
 import { useTranslation } from "react-i18next";
 import {
   createEvent,
@@ -14,25 +16,37 @@ export function NewEventDialog(props) {
   const [form] = Form.useForm();
   const { TextArea } = Input;
   let ident = Math.floor(Math.random() * 1000000 + 1);
-  let position = null;
+  const [location, setLocation] = React.useState(null);
   let type = "INFO";
-  const changePosition = (pos) => {
-    position = pos;
+  const changeLocation = (loc) => {
+    console.log(loc);
+    setLocation(loc);
   };
   const submit = () => {
     form.validateFields().then((values) => {
-      if (position === null) {
+      if (location.position === null) {
         props.returnData("location missing");
       } else {
         const user = JSON.parse(sessionStorage.getItem("user")).user;
+        const coordinates = [];
+        location.areas.forEach((value) => {
+          value.coords.forEach((v) => {
+            coordinates.push({
+              area: value.id,
+              x: v.lat,
+              y: v.lng,
+            });
+          });
+        });
         const event = {
           random: ident,
           title: values.title,
           description: values.desc,
           type,
-          x: position[0],
-          y: position[1],
+          x: location.position[0],
+          y: location.position[1],
           creator: user.id,
+          coords: coordinates,
         };
         console.log(event);
         createEvent(event)
@@ -97,10 +111,7 @@ export function NewEventDialog(props) {
         />
       </Form.Item>
       <Form.Item>
-        <LocationPicker
-          callback={changePosition}
-          deviceLocation={false}
-        ></LocationPicker>
+        <AreaPicker returnLocation={changeLocation}></AreaPicker>
       </Form.Item>
       <Form.Item>
         <ImageUpload

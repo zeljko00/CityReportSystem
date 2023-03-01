@@ -1,7 +1,7 @@
 import * as React from "react";
 import { Button, Form, Input } from "antd";
 import ImageUpload from "../components/ImageUpload";
-import LocationPicker from "../components/LocationPicker";
+import AreaPicker from "../components/AreaPicker";
 import { useTranslation } from "react-i18next";
 import {
   updateEvent,
@@ -13,19 +13,36 @@ export function UpdateEvent(props) {
   const { t } = useTranslation();
   const [form] = Form.useForm();
   const { TextArea } = Input;
-  let position = null;
-  const changePosition = (pos) => {
-    position = pos;
+  const [location, setLocation] = React.useState(null);
+  const changeLocation = (loc) => {
+    setLocation(loc);
   };
   const submit = () => {
     form.validateFields().then((values) => {
       const event = props.event;
       if (values.desc !== undefined) event.description = values.desc;
       if (values.info !== undefined) event.info = values.info;
-      if (position != null) {
-        event.x = position[0];
-        event.y = position[1];
+      const areas = [];
+      if (location !== null) {
+        console.log(location.areas);
+        if (location.position != null) {
+          event.x = location.position[0];
+          event.y = location.position[1];
+        }
+        location.areas.forEach((value) => {
+          const coordinates = [];
+          value.coords.forEach((v) => {
+            coordinates.push({
+              area: value.id,
+              x: v.lat,
+              y: v.lng,
+            });
+          });
+          areas.push(coordinates);
+        });
+        if (areas.length > 0) event.coords = areas;
       }
+      console.log(areas);
       console.log(event);
       updateEvent(JSON.parse(sessionStorage.getItem("user")).user.id, event)
         .then((response) => {
@@ -63,10 +80,7 @@ export function UpdateEvent(props) {
         />
       </Form.Item>
       <Form.Item>
-        <LocationPicker
-          callback={changePosition}
-          deviceLocation={false}
-        ></LocationPicker>
+        <AreaPicker returnLocation={changeLocation}></AreaPicker>
       </Form.Item>
       <Form.Item>
         {/* // izmijeniti */}

@@ -9,11 +9,31 @@ function EventLocation(props) {
   console.log(props);
   const { t } = useTranslation();
   const event = props.event;
-  const pos = [];
-  if (props.event.coords)
-    props.event.coords.forEach((c) => {
-      pos.push([c.x, c.y]);
+  const [polygons, setPolygons] = React.useState([]);
+  React.useEffect(() => {
+    const temp = [];
+    props.event.coords.forEach((area) => {
+      const coordinates = [];
+      const key = area[0].area;
+      area.forEach((c) => {
+        coordinates.push([c.x, c.y]);
+      });
+
+      const poly = {
+        color:
+          event.type === "INFO"
+            ? infoOptions
+            : event.type === "DANGER"
+            ? dangerOptions
+            : workOptions,
+        coords: coordinates,
+        id: key,
+      };
+      console.log(poly);
+      temp.push(poly);
     });
+    setPolygons(temp);
+  }, []);
 
   const polygon = [
     [44.8726118, 17.2588105],
@@ -144,17 +164,16 @@ function EventLocation(props) {
               t
             )}
         <Polygon pathOptions={limeOptions} positions={polygon} />
-        <Polygon
-          key={props.event.id}
-          pathOptions={
-            event.type === "INFO"
-              ? infoOptions
-              : event.type === "DANGER"
-              ? dangerOptions
-              : workOptions
-          }
-          positions={pos}
-        ></Polygon>
+        {polygons &&
+          polygons.map((p) => {
+            return (
+              <Polygon
+                key={p.id}
+                pathOptions={p.color}
+                positions={p.coords}
+              ></Polygon>
+            );
+          })}
       </MapContainer>
     </div>
   );

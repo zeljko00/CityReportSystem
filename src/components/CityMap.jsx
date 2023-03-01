@@ -20,6 +20,31 @@ function CityMap() {
     getActiveEvents()
       .then((response) => {
         console.log(response.data);
+        response.data.forEach((event) => {
+          console.log(event);
+          event.coords.forEach((area) => {
+            let counter = 1;
+            const coordinates = [];
+            area.forEach((c) => {
+              coordinates.push([c.x, c.y]);
+            });
+
+            const temp = polygons;
+            const poly = {
+              color:
+                event.type === "INFO"
+                  ? infoOptions
+                  : event.type === "DANGER"
+                  ? dangerOptions
+                  : workOptions,
+              coords: coordinates,
+              id: event.id + "-" + counter++,
+            };
+            console.log(poly);
+            temp.push(poly);
+            setPolygons(temp);
+          });
+        });
         changeEvents(response.data);
       })
       .catch(() => {});
@@ -102,7 +127,7 @@ function CityMap() {
   const infoOptions = { color: "blue" };
   const dangerOptions = { color: "red" };
   const workOptions = { color: "yellow" };
-
+  const [polygons, setPolygons] = useState([]);
   return (
     <div className="mapArea">
       <MapContainer
@@ -158,23 +183,13 @@ function CityMap() {
           )}
         ;
         <Polygon pathOptions={limeOptions} positions={polygon} />
-        {events &&
-          events.map((event) => {
-            const pos = [];
-            event.coords.forEach((c) => {
-              pos.push([c.x, c.y]);
-            });
+        {polygons &&
+          polygons.map((p) => {
             return (
               <Polygon
-                key={event.id}
-                pathOptions={
-                  event.type === "INFO"
-                    ? infoOptions
-                    : event.type === "DANGER"
-                    ? dangerOptions
-                    : workOptions
-                }
-                positions={pos}
+                key={p.id}
+                pathOptions={p.color}
+                positions={p.coords}
               ></Polygon>
             );
           })}
