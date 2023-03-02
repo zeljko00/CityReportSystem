@@ -14,6 +14,51 @@ export function getReportStates() {
     },
   });
 }
+export function getReportTypesByDepartment(id) {
+  return axios.get("/CityReportSystem/reports/types/" + id, {
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+}
+export function getReports(
+  user,
+  department,
+  page,
+  size,
+  type,
+  state,
+  search,
+  sort,
+  dir
+) {
+  return axios.get(
+    "/CityReportSystem/reports/" +
+      user +
+      "/" +
+      department +
+      "/" +
+      type +
+      "/" +
+      state +
+      "/" +
+      page +
+      "/" +
+      size +
+      "/" +
+      search +
+      "/" +
+      sort +
+      "/" +
+      dir,
+    {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    }
+  );
+}
+
 export function postReport(report) {
   return axios.post("/CityReportSystem/reports", report, {
     headers: { "Content-Type": "application/json" },
@@ -21,6 +66,11 @@ export function postReport(report) {
 }
 export function provideInfo(report, info) {
   return axios.put("/CityReportSystem/reports/additionalInfo/" + report, info, {
+    headers: { "Content-Type": "application/json" },
+  });
+}
+export function addFeedback(report, feedback) {
+  return axios.put("/CityReportSystem/reports/feedback/" + report, feedback, {
     headers: { "Content-Type": "application/json" },
   });
 }

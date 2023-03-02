@@ -126,5 +126,10 @@
   "locationMissing": "Odaberite lokaciju",
   "eventUpdated": "Dešavanje ažurirano",
   "eventNotUpdated": "Neuspješno ažuriranje",
-  "updateEvent": "Ažuriranje dešavanja"
+  "updateEvent": "Ažuriranje dešavanja",
+  "reportState": "Stanje prijave",
+  "typeReport": "Tip prijave",
+  "addFeedback": "Dodaj povratne informacije",
+  "feedbackRequired": "Unesite povratne informacije",
+  "feedbackAdded": "Povratne informacije poslate!"
 }

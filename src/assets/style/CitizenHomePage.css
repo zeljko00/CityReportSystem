@@ -198,3 +198,6 @@
     align-items: center;
     margin-left: 5px;
 }
+.red-text{
+    color: red !important;
+}

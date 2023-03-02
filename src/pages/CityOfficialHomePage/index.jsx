@@ -12,6 +12,7 @@ import LogoutIcon from "@mui/icons-material/Logout";
 import { Tab, Box } from "@mui/material";
 import AccountBoxIcon from "@mui/icons-material/AccountBox";
 import userImg from "../../assets/images/user.png";
+
 // import Badge from "@mui/material/Badge";
 // import MailIcon from "@mui/icons-material/Mail";
 // import AccountCircleIcon from "@mui/icons-material/AccountCircle";
@@ -34,6 +35,7 @@ import // getReportTypes,
 // getReportStates,
 "../../services/report.service";
 import EventTable from "../../components/EventTable";
+import ReportTable from "../../components/ReportTable";
 // import obj from "../../../package.json";
 // import { ReportAdditionalInfoForm } from "../../components/ReportAdditionalInfoForm";
 
@@ -341,7 +343,10 @@ export function CityOfficialHomePage() {
             <TabPanel value="1">
               <CityMap></CityMap>
             </TabPanel>
-            <TabPanel value="2"></TabPanel>
+            <TabPanel value="2">
+              <ReportTable></ReportTable>
+              <div className="placeholder-div"></div>
+            </TabPanel>
             <TabPanel value="3">
               <EventTable></EventTable>
               <div className="placeholder-div"></div>

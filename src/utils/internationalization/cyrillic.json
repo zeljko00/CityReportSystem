@@ -127,5 +127,10 @@
   "locationMissing": "Одаберите локацију дешавања",
   "eventUpdated": "Дешавање ажурирано",
   "eventNotUpdated": "Несупјешно ажурирање",
-  "updateEvent": "Ажурирање дешавања"
+  "updateEvent": "Ажурирање дешавања",
+  "reportState": "Стање пријаве",
+  "typeReport": "Тип пријаве",
+  "addFeedback": "Додај повратне информације",
+  "feedbackRequired": "Унесите повратне информације",
+  "feedbackAdded": "Повратне информације послате"
 }

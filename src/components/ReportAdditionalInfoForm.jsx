@@ -11,7 +11,8 @@ export const ReportAdditionalInfoForm = (props) => {
   const submit = () => {
     form.validateFields().then((values) => {
       console.log(values.providedInfo);
-      provideInfo(props.report, values.providedInfo);
+      provideInfo(props.report.id, values.providedInfo);
+      props.report.requiredInfo = false;
       props.func();
     });
   };
@@ -54,6 +55,6 @@ export const ReportAdditionalInfoForm = (props) => {
   );
 };
 ReportAdditionalInfoForm.propTypes = {
-  report: PropTypes.number,
+  report: PropTypes.object,
   func: PropTypes.func,
 };

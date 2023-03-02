@@ -286,8 +286,10 @@ export function CitizenHomePage() {
       }
     });
   };
+  const [changing, setChanging] = React.useState(false);
   const signal = () => {
     console.log("changing!");
+    setChanging(!changing);
     messageApi.open({
       type: "success",
       content: t("successfulProvidingInfo"),
@@ -524,15 +526,27 @@ export function CitizenHomePage() {
                                 <br />
                                 {report.content}
                               </p>
-                              <p>
-                                <span className="title-span-extended">
-                                  {t("note") + ": "}
-                                </span>
-                                <br />
-                                {report.note !== null && report.note !== ""
-                                  ? report.note
-                                  : "-"}
-                              </p>
+                              {report.note !== null && report.note !== "" && (
+                                <p>
+                                  <span className="title-span-extended">
+                                    {t("note") + ": "}
+                                  </span>
+                                  <br />
+
+                                  {report.note}
+                                </p>
+                              )}
+                              {report.feedback && report.feedback !== "" && (
+                                <p>
+                                  <span className="title-span-extended">
+                                    {t("feedback") + ": "}
+                                  </span>
+                                  <br />
+
+                                  {report.feedback}
+                                </p>
+                              )}
+
                               {report.providedAdditionalInfo !== null &&
                                 report.providedAdditionalInfo !== "" && (
                                   <p>
@@ -545,16 +559,16 @@ export function CitizenHomePage() {
                                 )}
                               {report.requiredInfo && (
                                 <p>
-                                  <span className="title-span-extended">
+                                  <span className="title-span-extended red-text">
                                     {t("requiredInfo") + ": "}
                                   </span>
                                   <br />
-                                  <b>{report.requiredAdditionalInfo}</b>
+                                  {report.requiredAdditionalInfo}
                                 </p>
                               )}
                               {report.requiredInfo && (
                                 <ReportAdditionalInfoForm
-                                  report={report.id}
+                                  report={report}
                                   func={signal}
                                 ></ReportAdditionalInfoForm>
                               )}
