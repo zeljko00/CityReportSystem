@@ -229,7 +229,7 @@ export default function EventTable() {
   const [order, setOrder] = React.useState("desc");
   const [orderBy, setOrderBy] = React.useState("date");
   const [page, setPage] = React.useState(0);
-  const [rowsPerPage, setRowsPerPage] = React.useState(5);
+  const [rowsPerPage, setRowsPerPage] = React.useState(10);
   const [total, changeTotal] = React.useState(-1);
   const [search, changeSearch] = React.useState("");
 
@@ -781,7 +781,7 @@ function Row(props) {
                 <div className="flex-div half-width">
                   <p className="event-title">{row.title}</p>
                   <p className="event-info">
-                    <InfoTwoToneIcon sx={{ fontSize: 30 }} color="success" />{" "}
+                    <InfoTwoToneIcon sx={{ fontSize: 22 }} color="success" />{" "}
                     {row.description}
                   </p>
                   <Divider />

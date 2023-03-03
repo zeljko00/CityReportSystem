@@ -161,9 +161,9 @@ export function CitizenHomePage() {
       handleChange(null, sessionStorage.getItem("tab"));
     }
     counter = 1;
-    if (JSON.parse(sessionStorage.getItem("user")) !== null) {
+    const temp = JSON.parse(sessionStorage.getItem("user"));
+    if (temp !== null && temp !== undefined) {
       changeGuest(false);
-      const temp = JSON.parse(sessionStorage.getItem("user"));
       changeUser(temp);
       console.log("switched user to ");
       console.log(temp);
@@ -207,6 +207,8 @@ export function CitizenHomePage() {
           changeMyFilteredReports(response.data);
         })
         .catch();
+    } else {
+      navigate("/CityReportSystem/login");
     }
   }, []);
 

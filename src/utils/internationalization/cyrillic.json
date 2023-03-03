@@ -132,5 +132,10 @@
   "typeReport": "Тип пријаве",
   "addFeedback": "Додај повратне информације",
   "feedbackRequired": "Унесите повратне информације",
-  "feedbackAdded": "Повратне информације послате"
+  "feedbackAdded": "Повратне информације послате",
+  "reportLocation": "Локација пријаве",
+  "stateChanged": "Стање пријаве је промијењено!",
+  "requireInfo": "Захтјев за додатним информацијама",
+  "requestSend": "Захтјев је послат!",
+  "feedbackRequiredForStateChange": "Неопходно је да прво унесете повратне информације!"
 }

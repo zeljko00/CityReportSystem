@@ -69,6 +69,20 @@ export function provideInfo(report, info) {
     headers: { "Content-Type": "application/json" },
   });
 }
+export function requireInfo(report, info) {
+  return axios.put("/CityReportSystem/reports/requireInfo/" + report, info, {
+    headers: { "Content-Type": "application/json" },
+  });
+}
+export function changeState(user, id, state) {
+  return axios.put(
+    "/CityReportSystem/reports/state/" + user + "/" + id,
+    state,
+    {
+      headers: { "Content-Type": "application/json" },
+    }
+  );
+}
 export function addFeedback(report, feedback) {
   return axios.put("/CityReportSystem/reports/feedback/" + report, feedback, {
     headers: { "Content-Type": "application/json" },

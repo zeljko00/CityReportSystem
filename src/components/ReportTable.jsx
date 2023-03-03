@@ -17,11 +17,14 @@ import { visuallyHidden } from "@mui/utils";
 import { useTranslation } from "react-i18next";
 import TextField from "@mui/material/TextField";
 import AddTaskIcon from "@mui/icons-material/AddTask";
+import ContactSupportIcon from "@mui/icons-material/ContactSupport";
 import {
   getReports,
   getReportStates,
   getReportTypesByDepartment,
   addFeedback,
+  changeState,
+  requireInfo,
 } from "../services/report.service";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
@@ -49,7 +52,6 @@ import ReportLocation from "../components/ReportLocation";
 import DialogTitle from "@mui/material/DialogTitle";
 import Dialog from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
-import { UpdateEvent } from "../components/UpdateEvent";
 import DialogContent from "@mui/material/DialogContent";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
@@ -156,7 +158,7 @@ export default function ReportTable() {
   const [order, setOrder] = React.useState("desc");
   const [orderBy, setOrderBy] = React.useState("date");
   const [page, setPage] = React.useState(0);
-  const [rowsPerPage, setRowsPerPage] = React.useState(5);
+  const [rowsPerPage, setRowsPerPage] = React.useState(10);
   const [total, changeTotal] = React.useState(-1);
   const [search, changeSearch] = React.useState("");
 
@@ -413,7 +415,12 @@ export default function ReportTable() {
               <TableBody>
                 {rows.map((row, index) => {
                   return (
-                    <Row key={row.id} row={row} className="body-row"></Row>
+                    <Row
+                      key={row.id}
+                      row={row}
+                      states={states}
+                      className="body-row"
+                    ></Row>
                   );
                 })}
               </TableBody>
@@ -496,41 +503,70 @@ function Row(props) {
 
     setOpened(false);
   };
+
+  const handleChangeState = (event) => {
+    const data = JSON.parse(sessionStorage.getItem("user"));
+    const user = data.user;
+    console.log(event.target.value);
+    if (event.target.value !== row.state) {
+      row.state = event.target.value;
+      if (event.target.value === "CLOSED") {
+        user.solvedReports++;
+        sessionStorage.setItem("user", JSON.stringify(data));
+        if (!row.feedback || row.feedback === "") {
+          changeMsg("feedbackRequiredForStateChange");
+          changeSeverity("error");
+          handleClick();
+          return;
+        }
+      }
+      setState(event.target.value);
+      changeState(user.department.id, row.id, event.target.value)
+        .catch()
+        .then((response) => {
+          changeMsg("stateChanged");
+          changeSeverity("success");
+          handleClick();
+        });
+    }
+  };
+  // eslint-disable-next-line no-unused-vars
+  const [state, setState] = React.useState(row.state);
   const [msg, changeMsg] = React.useState("-");
   const [severity, changeSeverity] = React.useState("success");
   const [openDialog, setOpenDialog] = React.useState(false);
   const handleOpenDialog = () => {
     setOpenDialog(true);
   };
-  const returnUpdateEvent = (data) => {
-    if (data === "error") {
-      changeMsg("eventNotUpdated");
-      changeSeverity("error");
-    } else {
-      console.log("updated event:");
-      console.log(data);
-      row.info = data.info;
-      row.x = data.x;
-      row.y = data.y;
-      row.description = data.description;
-      row.images = data.images;
-      changeChanged(!changed);
-      changeMsg("eventUpdated");
-      changeSeverity("success");
-    }
-    handleClick();
-  };
+
   const handleCloseDialog = (value) => {
     setOpenDialog(false);
   };
-  const [openUpdateEventDialog, setOpenUpdateEventDialog] =
+  const [openRequireInfoDialog, setOpenRequireInfoDialog] =
     React.useState(false);
-  // const handleOpenUpdateEventDialog = () => {
-  //   setOpenUpdateEventDialog(true);
-  // };
+  // eslint-disable-next-line no-unused-vars
+  const handleOpenRequireInfoDialog = () => {
+    setOpenRequireInfoDialog(true);
+  };
+  const [info, setInfo] = React.useState("");
+  const handleRequireInfo = () => {
+    console.log(info);
+    console.log(row.id);
+    requireInfo(row.id, info)
+      .catch(() => {
+        changeMsg(t("error"));
+        changeSeverity("error");
+        handleClick();
+      })
+      .then(() => {
+        changeMsg(t("requestSend"));
+        changeSeverity("success");
+        handleClick();
+      });
+  };
 
-  const handleCloseUpdateEventDialog = (value) => {
-    setOpenUpdateEventDialog(false);
+  const handleCloseRequireInfoDialog = () => {
+    setOpenRequireInfoDialog(false);
   };
   return (
     <React.Fragment>
@@ -573,10 +609,21 @@ function Row(props) {
             <Box>
               <div id="flex-column-container">
                 <div className="flex-div half-width">
-                  <p className="event-title">{row.title}</p>
+                  <p className="event-title">
+                    {row.title}
+                    <Tooltip title={t("reportLocation")}>
+                      <IconButton
+                        color="primary"
+                        sx={{ fontSize: 37 }}
+                        onClick={() => handleOpenDialog()}
+                      >
+                        <LocationOnTwoToneIcon fontSize="inherit" />
+                      </IconButton>
+                    </Tooltip>
+                  </p>
                   <Divider />
                   <p className="event-info">
-                    <InfoTwoToneIcon sx={{ fontSize: 30 }} color="success" />{" "}
+                    <InfoTwoToneIcon sx={{ fontSize: 22 }} color="success" />{" "}
                     {t("content") + ": "} <br></br>
                     {row.content}
                   </p>
@@ -589,14 +636,25 @@ function Row(props) {
                   {row.note && row.note !== "" && (
                     <>
                       <p className="note-div">
-                        <InfoTwoToneIcon sx={{ fontSize: 30 }} color="error" />{" "}
+                        <InfoTwoToneIcon sx={{ fontSize: 22 }} color="error" />{" "}
                         {t("note") + ": "} <br></br>
                         {row.note}
                       </p>
                     </>
                   )}
-                  <Divider />
-
+                  {row.feedback && row.feedback !== "" && (
+                    <>
+                      <p className="note-div">
+                        <InfoTwoToneIcon
+                          sx={{ fontSize: 22 }}
+                          color="primary"
+                        />{" "}
+                        {t("feedback") + ": "} <br></br>
+                        {row.feedback.split("||").join(" ")}
+                      </p>
+                    </>
+                  )}
+                  <Divider />{" "}
                   <TextField
                     id="filled-multiline-flexible"
                     label={t("feedback")}
@@ -627,49 +685,38 @@ function Row(props) {
                       ></AddTaskIcon>
                     </IconButton>
                   </Tooltip>
-                  {row.feedback && row.feedback !== "" && (
-                    <>
-                      <p className="note-div">
-                        <InfoTwoToneIcon
-                          sx={{ fontSize: 30 }}
-                          color="primary"
-                        />{" "}
-                        {t("note") + ": "} <br></br>
-                        {row.feedback.split("||").join(" ")}
-                      </p>
-                    </>
+                  {!row.solvedDate && (
+                    <div className="settings">
+                      <FormControl
+                        variant="standard"
+                        sx={{ m: 1, minWidth: 170 }}
+                      >
+                        <InputLabel id="demo-simple-select-standard-label">
+                          {t("state")}
+                        </InputLabel>
+                        <Select value={state} onChange={handleChangeState}>
+                          {props.states.map((ss) => {
+                            return (
+                              <MenuItem key={ss} value={ss}>
+                                {t(ss)}
+                              </MenuItem>
+                            );
+                          })}
+                        </Select>
+                      </FormControl>
+                      <Tooltip title={t("requireInfo")}>
+                        <IconButton
+                          sx={{ marginTop: "10px" }}
+                          onClick={() => handleOpenRequireInfoDialog()}
+                        >
+                          <ContactSupportIcon
+                            color="primary"
+                            sx={{ fontSize: 35 }}
+                          ></ContactSupportIcon>
+                        </IconButton>
+                      </Tooltip>
+                    </div>
                   )}
-                  <div className="controls">
-                    <IconButton
-                      color="primary"
-                      sx={{ fontSize: 37 }}
-                      onClick={() => handleOpenDialog()}
-                    >
-                      <LocationOnTwoToneIcon fontSize="inherit" />
-                    </IconButton>
-                    {
-                      // row.creator.id ===
-                      //   JSON.parse(sessionStorage.getItem("user")).user.id &&
-                      //   row.active && (
-                      //     <>
-                      //       <IconButton
-                      //         color="success"
-                      //         sx={{ fontSize: 37 }}
-                      //         onClick={() => handleOpenUpdateEventDialog(row)}
-                      //       >
-                      //         <SettingsTwoToneIcon fontSize="inherit" />
-                      //       </IconButton>
-                      //       {/* <IconButton
-                      //         color="error"
-                      //         sx={{ fontSize: 37 }}
-                      //         onClick={() => deleteClick(row)}
-                      //       >
-                      //         <DeleteIcon fontSize="inherit" />
-                      //       </IconButton> */}
-                      //     </>
-                      //   )
-                    }
-                  </div>
                 </div>
                 <div className="flex-div half-width" id="gallery">
                   {row.images.length > 0 ? (
@@ -711,27 +758,34 @@ function Row(props) {
                   </DialogActions>
                 </Dialog>
                 <Dialog
-                  open={openUpdateEventDialog}
-                  onClose={handleCloseUpdateEventDialog}
+                  open={openRequireInfoDialog}
                   maxWidth="md"
                   fullWidth
                   className="update-event-dialog"
                 >
-                  <DialogTitle>{t("updateEvent")}</DialogTitle>
+                  <DialogTitle>{t("requireInfo")}</DialogTitle>
                   <Divider />
                   <DialogContent style={{ overflowY: "visible" }}>
                     <div className="form-wrapper">
-                      <UpdateEvent
-                        returnData={returnUpdateEvent}
-                        event={row}
-                      ></UpdateEvent>
+                      <TextField
+                        id="filled-multiline-flexible"
+                        label={t("addInfo")}
+                        multiline
+                        rows={8}
+                        variant="standard"
+                        fullWidth
+                        onChange={(event) => setInfo(event.target.value)}
+                      />
                     </div>
                   </DialogContent>
                   <Divider />
                   <DialogActions>
+                    <Button autoFocus onClick={() => handleRequireInfo()}>
+                      {t("send")}
+                    </Button>
                     <Button
                       autoFocus
-                      onClick={() => handleCloseUpdateEventDialog()}
+                      onClick={() => handleCloseRequireInfoDialog()}
                     >
                       {t("return")}
                     </Button>
@@ -747,4 +801,5 @@ function Row(props) {
 }
 Row.propTypes = {
   row: PropTypes.object,
+  states: PropTypes.array,
 };

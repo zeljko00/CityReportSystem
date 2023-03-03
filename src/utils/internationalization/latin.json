@@ -131,5 +131,10 @@
   "typeReport": "Tip prijave",
   "addFeedback": "Dodaj povratne informacije",
   "feedbackRequired": "Unesite povratne informacije",
-  "feedbackAdded": "Povratne informacije poslate!"
+  "feedbackAdded": "Povratne informacije poslate!",
+  "reportLocation": "Lokacija prijave",
+  "stateChanged": "Stanje prijave je promijenjeno!",
+  "requireInfo": "Zahtjev za dodatnim informacija",
+  "requestSend": "Zahtjev je poslat!",
+  "feedbackRequiredForStateChange": "Neophodno je da prvo unesete povratne informacije!"
 }
