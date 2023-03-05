@@ -57,7 +57,7 @@ export function CityOfficialHomePage() {
     }
   }, []);
 
-  const [value, setValue] = useState("1");
+  const [value, setValue] = useState("4");
 
   const navigate = useNavigate();
 

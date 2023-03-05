@@ -5,7 +5,12 @@ import { LogIn } from "./pages/LogIn/index";
 import { SignUp } from "./pages/SignUp/index";
 import { CitizenHomePage } from "./pages/CitizenHomePage/index";
 import { CityOfficialHomePage } from "./pages/CityOfficialHomePage/index";
+import { ManagerHomePage } from "./pages/ManagerHomePage/index";
 import initializeI18n from "./utils/internationalization/initialize";
+// eslint-disable-next-line no-unused-vars
+import { LocalizationProvider } from "@mui/x-date-pickers";
+// eslint-disable-next-line no-unused-vars
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 
 // koristi se za prevodjenje (inicijalizuje se trenutni jezik, na osnovu vrijednosti procitanje iz local storage)
 initializeI18n();
@@ -51,6 +56,16 @@ function App() {
           path="/CityReportSystem/city"
           exact
           element={<CityOfficialHomePage />}
+        ></Route>
+        <Route
+          path="/CityReportSystem/city/manager/home"
+          exact
+          element={<ManagerHomePage />}
+        ></Route>
+        <Route
+          path="/CityReportSystem/city/manager"
+          exact
+          element={<ManagerHomePage />}
         ></Route>
         <Route path="*" element={<LogIn />}></Route>
       </Routes>

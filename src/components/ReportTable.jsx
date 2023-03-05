@@ -26,6 +26,7 @@ import {
   changeState,
   requireInfo,
 } from "../services/report.service";
+import Badge from "@mui/material/Badge";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import Typography from "@mui/material/Typography";
@@ -43,6 +44,7 @@ import ReceiptLongTwoToneIcon from "@mui/icons-material/ReceiptLongTwoTone";
 import Divider from "@mui/material/Divider";
 import InfoTwoToneIcon from "@mui/icons-material/InfoTwoTone";
 import LocationOnTwoToneIcon from "@mui/icons-material/LocationOnTwoTone";
+import MailIcon from "@mui/icons-material/Mail";
 import { Carousel } from "antd";
 import noimg from "../assets/images/no-img.png";
 import Button from "@mui/material/Button";
@@ -591,7 +593,12 @@ function Row(props) {
         </TableCell>
 
         <TableCell align="left" sx={{ minWidth: "150px" }}>
-          {t(row.state)}
+          {t(row.state) + "  "}
+          {row.state === "RECEIVED" && (
+            <Badge badgeContent={1} color="primary">
+              <MailIcon color="action" />
+            </Badge>
+          )}
         </TableCell>
         <TableCell>
           <IconButton

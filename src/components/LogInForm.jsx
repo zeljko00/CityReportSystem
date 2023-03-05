@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { Button, Checkbox, Form, Input, message } from "antd";
 import { LockOutlined, UserOutlined } from "@ant-design/icons";
 import { useTranslation } from "react-i18next";
@@ -8,14 +8,9 @@ import PropTypes from "prop-types";
 
 export function LogInForm(props) {
   const [form] = Form.useForm();
-  const [user, changeUser] = useState(null);
   const [messageApi, contextHolder] = message.useMessage();
   const { t } = useTranslation();
   const navigate = useNavigate();
-
-  useEffect(() => {
-    console.log("current user: " + user);
-  }, [user]);
 
   const register = () => {
     navigate("/CityReportSystem/citizen/signup");
@@ -30,7 +25,6 @@ export function LogInForm(props) {
         .then((result) => {
           // successful login - changing current user
           console.log("fetched user data: " + result.data);
-          changeUser(result.data);
           sessionStorage.setItem("user", JSON.stringify(result.data));
           if (result.data.user.role === "CITIZEN")
             navigate("/CityReportSystem/citizen/home");

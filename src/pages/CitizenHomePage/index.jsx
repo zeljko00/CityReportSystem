@@ -208,7 +208,7 @@ export function CitizenHomePage() {
         })
         .catch();
     } else {
-      navigate("/CityReportSystem/login");
+      changeUser("guest");
     }
   }, []);
 
@@ -450,9 +450,11 @@ export function CitizenHomePage() {
                     sx={{ fontSize: "50px" }}
                     color="info"
                   ></AccountCircleIcon>
-                  <span id="user-info">
-                    {user.user.firstName + " " + user.user.lastName}
-                  </span>
+                  {user && user !== "guest" && (
+                    <span id="user-info">
+                      {user.user.firstName + " " + user.user.lastName}
+                    </span>
+                  )}
                 </div>
                 <div className="filter-sort-div">
                   <Select

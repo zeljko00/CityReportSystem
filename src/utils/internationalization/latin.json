@@ -136,5 +136,17 @@
   "stateChanged": "Stanje prijave je promijenjeno!",
   "requireInfo": "Zahtjev za dodatnim informacija",
   "requestSend": "Zahtjev je poslat!",
-  "feedbackRequiredForStateChange": "Neophodno je da prvo unesete povratne informacije!"
+  "activityInspection": "Pregled aktivnosti",
+  "statistics": "Statistika",
+  "feedbackRequiredForStateChange": "Neophodno je da prvo unesete povratne informacije!",
+  "report": "Tip prijave",
+  "firstDate": "Početni datum",
+  "lastDate": "Krajnji datum",
+  "days": "dana",
+  "hours": "sati",
+  "mins": "minuta",
+  "total": "zaprimljeno",
+  "solved": "obrađeno",
+  "avgTime": "prosječno vrijeme obrade",
+  "maxTime": "najduža obrada"
 }
