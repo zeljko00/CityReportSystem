@@ -107,7 +107,6 @@ export function ReportMap(props) {
   );
 }
 function addMarkers(s, report, date1, date2) {
-  console.log(report);
   //   const { t } = useTranslation();
   const markerIcon = new L.Icon({
     iconUrl: require("../assets/images/info.png"),

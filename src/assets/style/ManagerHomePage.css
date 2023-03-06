@@ -19,21 +19,23 @@
     background-image: url("../images/dashboard1.png");
 }
 .dashboard-cell{
-    background-size: cover;
+    background-size: 100% 100%;
+    background-position: center;
     flex-grow: 1;
-    min-width: 343px;
+   min-width: 343px;
     min-height: 188px;
     margin: 10px;
+   
     background-repeat: no-repeat;
 
 }
 .large-font{
-    font-size: 4vmax;
+    font-size: 3vmax;
     margin-top: 20px;
 }
 .medium-font{
-    font-size: 1.5vmax;
-    margin-top: 75px;
+    font-size: 1.4vmax;
+    margin-top: 45px;
 }
 .value{
     color: white;
@@ -59,4 +61,10 @@
 }
 .type-pie{
     height: 300px;
+}
+.time-for-solving-per-type{
+    height: 400px;
+}
+.small-font{
+    font-size: 1.5vmax;
 }

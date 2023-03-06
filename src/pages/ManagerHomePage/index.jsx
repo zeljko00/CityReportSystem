@@ -26,7 +26,23 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { ReportMap } from "../../components/ReportMap";
 import { LayersControl } from "react-leaflet";
-import { PieChart, Pie, Sector, Cell, ResponsiveContainer } from "recharts";
+import {
+  PieChart,
+  Pie,
+  Sector,
+  Cell,
+  ResponsiveContainer,
+  Tooltip,
+  Legend,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  AreaChart,
+  Area,
+} from "recharts";
+import { UserSwitchOutlined } from "@ant-design/icons";
 export function ManagerHomePage() {
   const date = new Date();
   const [reportStates, changeStates] = useState([]);
@@ -58,7 +74,12 @@ export function ManagerHomePage() {
   const [differencePer, setDifferencePer] = React.useState("");
   const [solvedPer, setSolvedPer] = React.useState("");
   const [avgPer, setAvgPer] = React.useState("");
-  const [pieData, setPieData] = React.useState("");
+  const [pieData, setPieData] = React.useState(null);
+  const [avgTimePerType, setAvgTimePerType] = useState(null);
+  const [reportsPerType, setReportsPerType] = useState(null);
+  const [reportsPerDay, setReportsPerDay] = useState(0);
+  const [solvedPerDay, setSolvedPerDay] = useState(0);
+  const [areaChartData, setAreaChartData] = useState(null);
   useEffect(() => {
     if (sessionStorage.getItem("tab") !== null) {
       console.log("saved tab: " + sessionStorage.getItem("tab"));
@@ -136,10 +157,10 @@ export function ManagerHomePage() {
           " " +
           t("mins")
       );
-      console.log(response.data.differencePercentage);
       const max = parseTimeInMin(response.data.maxTime.number);
-      setMaxTime(
-        max[0] +
+      setMaxTime({
+        value:
+          max[0] +
           " " +
           t("days") +
           " " +
@@ -149,22 +170,55 @@ export function ManagerHomePage() {
           " " +
           max[2] +
           " " +
-          t("mins")
-      );
-      console.log(response.data.avgPercentage);
+          t("mins"),
+        type: response.data.maxTime.type,
+      });
       setAvgPer(response.data.avgPercentage);
       setDifferencePer(response.data.differencePercentage);
       setSolvedPer(response.data.solvedPercentage);
       setReports(response.data.reportsData);
+      setReportsPerDay(response.data.reportsPerDay);
+      setSolvedPerDay(response.data.solvedPerDay);
       const array = [];
       response.data.reportsPerType.forEach((tuple) => {
-        array.push({
-          name: tuple.type,
-          value: tuple.number / response.data.reports,
+        if (tuple.number !== 0)
+          array.push({
+            name: t(tuple.type),
+            value: tuple.number / response.data.reports,
+          });
+      });
+      setPieData(array);
+      const avgTime = [];
+      response.data.avgTimePerType.forEach((tuple) => {
+        console.log("avg - " + tuple.type + " - " + tuple.number);
+        avgTime.push({
+          name: t(tuple.type),
+          pv: tuple.number,
+          amt: 0.3,
         });
       });
-      console.log(array);
-      setPieData(array);
+      console.log(avgTime);
+      setAvgTimePerType(avgTime);
+      const perType = [];
+      response.data.reportsPerType.forEach((tuple) => {
+        perType.push({
+          name: t(tuple.type),
+          pv: tuple.number,
+          amt: 0.3,
+        });
+      });
+      console.log(perType);
+      setReportsPerType(perType);
+      const temp = [];
+      response.data.dataPerDay.forEach((tuple) => {
+        temp.push({
+          name: tuple.date,
+          pv: tuple.received,
+          uv: tuple.solved,
+        });
+      });
+      console.log(temp);
+      setAreaChartData(temp);
     });
   };
   const parseTimeInMin = (time) => {
@@ -176,8 +230,11 @@ export function ManagerHomePage() {
     return [days, hours, mins];
   };
   return (
-    reportTypes &&
-    pieData && (
+    areaChartData &&
+    reportsPerType &&
+    pieData &&
+    avgTimePerType &&
+    reportTypes && (
       <div className="citizen-home-page">
         <AppHeader></AppHeader>
         <div id="tab-menu">
@@ -210,7 +267,12 @@ export function ManagerHomePage() {
               <div className="dashboard">
                 <div className="dashboard-header">
                   <div className="blue-div dashboard-cell">
-                    <p className="value large-font">{totalReports}</p>
+                    <p className="value large-font">
+                      {totalReports + "  ("}
+                      {reportsPerDay.toFixed(2)}
+                      <span className="small-font">{" / " + t("perDay")}</span>
+                      {")"}
+                    </p>
                     <p className="key">{t("total")}</p>
                   </div>
                   <div className="purple-div dashboard-cell">
@@ -219,7 +281,12 @@ export function ManagerHomePage() {
                     ) : (
                       <p className="details bad">{solvedPer + "%"}</p>
                     )}
-                    <p className="value large-font">{solvedReports}</p>
+                    <p className="value large-font">
+                      {solvedReports + "  ("}
+                      {solvedPerDay.toFixed(2)}
+                      <span className="small-font">{" / " + t("perDay")}</span>
+                      {")"}
+                    </p>
                     <p className="key">{t("solved")}</p>
                   </div>
                   <div className="blue-div dashboard-cell">
@@ -239,17 +306,19 @@ export function ManagerHomePage() {
                   <div className="purple-div dashboard-cell">
                     <p className="details bad">{differencePer + "%"}</p>
 
-                    <p className="value medium-font">{maxTime}</p>
-                    <p className="key">{t("maxTime")}</p>
+                    <p className="value medium-font">{maxTime.value}</p>
+                    <p className="key">
+                      {t("maxTime") + " (" + t(maxTime.type) + ")"}
+                    </p>
                   </div>
                 </div>
                 <div className="type-pie">
                   {" "}
                   <ResponsiveContainer width="100%" height="100%">
-                    <PieChart width={400} height={400}>
+                    <PieChart width={700} height={400}>
                       <Pie
                         data={pieData}
-                        cx="50%"
+                        cx="62%"
                         cy="50%"
                         labelLine={false}
                         label={renderCustomizedLabel}
@@ -264,25 +333,112 @@ export function ManagerHomePage() {
                           />
                         ))}
                       </Pie>
-                      <Pie
-                        data={pieData}
-                        cx="50%"
-                        cy="50%"
-                        label
-                        innerRadius={122}
-                        outerRadius={140}
-                        fill="#8884d8"
-                        dataKey="value"
-                      >
-                        {pieData.map((entry, index) => (
-                          <Cell
-                            key={`cell-${index}`}
-                            fill={COLORS[index % COLORS.length]}
-                          />
-                        ))}
-                      </Pie>
+                      <Legend
+                        verticalAlign="center"
+                        height={36}
+                        layout="vertical"
+                      />
+                      <Tooltip />
                     </PieChart>
                   </ResponsiveContainer>
+                </div>
+                <div className="time-for-solving-per-type">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart
+                      width={500}
+                      height={300}
+                      data={avgTimePerType}
+                      margin={{
+                        top: 5,
+                        right: 30,
+                        left: 20,
+                        bottom: 5,
+                      }}
+                    >
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="name" />
+                      <YAxis dataKey="pv" />
+                      <Tooltip />
+
+                      <Bar dataKey="pv" fill="#8884d8" />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+                <div className="time-for-solving-per-type">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart
+                      width={500}
+                      height={300}
+                      data={reportsPerType}
+                      margin={{
+                        top: 5,
+                        right: 30,
+                        left: 20,
+                        bottom: 5,
+                      }}
+                    >
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="name" />
+                      <YAxis dataKey="pv" />
+                      <Tooltip />
+
+                      <Bar dataKey="pv" fill="#8884d8" />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+                <div className="area-chart">
+                  <AreaChart
+                    width={1030}
+                    height={250}
+                    data={areaChartData}
+                    margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
+                  >
+                    <defs>
+                      <linearGradient id="colorUv" x1="0" y1="0" x2="0" y2="1">
+                        <stop
+                          offset="5%"
+                          stopColor="#8884d8"
+                          stopOpacity={0.8}
+                        />
+                        <stop
+                          offset="95%"
+                          stopColor="#8884d8"
+                          stopOpacity={0}
+                        />
+                      </linearGradient>
+                      <linearGradient id="colorPv" x1="0" y1="0" x2="0" y2="1">
+                        <stop
+                          offset="5%"
+                          stopColor="#82ca9d"
+                          stopOpacity={0.8}
+                        />
+                        <stop
+                          offset="95%"
+                          stopColor="#82ca9d"
+                          stopOpacity={0}
+                        />
+                      </linearGradient>
+                    </defs>
+                    <XAxis dataKey="name" />
+                    <YAxis />
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <Tooltip />
+                    <Area
+                      type="monotone"
+                      dataKey="uv"
+                      stroke="#8884d8"
+                      fillOpacity={1}
+                      fill="url(#colorUv)"
+                    />
+                    <Area
+                      type="monotone"
+                      dataKey="pv"
+                      stroke="#82ca9d"
+                      fillOpacity={1}
+                      fill="url(#colorPv)"
+                    />
+                    <Legend></Legend>
+                  </AreaChart>
                 </div>
                 <ReportMap reports={reports}></ReportMap>
                 <div className="filters-container">
@@ -370,7 +526,22 @@ const data = [
   { name: "Group D", value: 200 },
 ];
 
-const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042"];
+const COLORS = [
+  "#0088FE",
+  "#00C49F",
+  "#FFBB28",
+  "#FF8042",
+  "#2dea89",
+  "#b2dc18",
+  "#dcc718",
+  "#15ad13",
+  "#2dead9",
+  "#1091be",
+  "#9610be",
+  "#f7690d",
+  "#dcc718",
+  "#71dc18",
+];
 
 const RADIAN = Math.PI / 180;
 const renderCustomizedLabel = ({
@@ -394,8 +565,7 @@ const renderCustomizedLabel = ({
       textAnchor={x > cx ? "start" : "end"}
       dominantBaseline="central"
     >
-      {percent}
-      {/* {`${(percent * 100).toFixed(0)}\n%`} */}
+      {`${(percent * 100).toFixed(0)}\n%`}
     </text>
   );
 };

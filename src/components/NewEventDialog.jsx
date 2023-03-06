@@ -17,7 +17,7 @@ export function NewEventDialog(props) {
   const { TextArea } = Input;
   let ident = Math.floor(Math.random() * 1000000 + 1);
   const [location, setLocation] = React.useState(null);
-  let type = "INFO";
+  const [type, setType] = React.useState("INFO");
   const changeLocation = (loc) => {
     console.log(loc);
     setLocation(loc);
@@ -69,7 +69,7 @@ export function NewEventDialog(props) {
 
   const onChange = (event) => {
     console.log(event);
-    type = event.target.value;
+    setType(event.target.value);
   };
   return (
     <Form
