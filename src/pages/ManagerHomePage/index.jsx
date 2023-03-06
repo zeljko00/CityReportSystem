@@ -24,11 +24,13 @@ import { getReportTypes } from "../../services/report.service";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import { ReportMap } from "../../components/ReportMap";
 import { LayersControl } from "react-leaflet";
+import { PieChart, Pie, Sector, Cell, ResponsiveContainer } from "recharts";
 export function ManagerHomePage() {
   const date = new Date();
   const [reportStates, changeStates] = useState([]);
-  const [reports, changeReports] = useState([]);
+  const [reports, setReports] = useState([]);
   const [typeFilter, changeTypeFilter] = useState("all");
   const [reportTypes, setReportTypes] = useState(null);
   const [value, setValue] = React.useState("2");
@@ -56,6 +58,7 @@ export function ManagerHomePage() {
   const [differencePer, setDifferencePer] = React.useState("");
   const [solvedPer, setSolvedPer] = React.useState("");
   const [avgPer, setAvgPer] = React.useState("");
+  const [pieData, setPieData] = React.useState("");
   useEffect(() => {
     if (sessionStorage.getItem("tab") !== null) {
       console.log("saved tab: " + sessionStorage.getItem("tab"));
@@ -152,18 +155,29 @@ export function ManagerHomePage() {
       setAvgPer(response.data.avgPercentage);
       setDifferencePer(response.data.differencePercentage);
       setSolvedPer(response.data.solvedPercentage);
+      setReports(response.data.reportsData);
+      const array = [];
+      response.data.reportsPerType.forEach((tuple) => {
+        array.push({
+          name: tuple.type,
+          value: tuple.number / response.data.reports,
+        });
+      });
+      console.log(array);
+      setPieData(array);
     });
   };
   const parseTimeInMin = (time) => {
     const days = Math.floor(time / (60 * 24));
     let mins = time - days * 60 * 24;
     const hours = Math.floor(mins / 60);
-    mins = mins - hours * 60;
+    mins = Math.floor(mins - hours * 60);
     if (isNaN(days) || isNaN(hours) || isNaN(mins)) return [0, 0, 0];
     return [days, hours, mins];
   };
   return (
-    reportTypes && (
+    reportTypes &&
+    pieData && (
       <div className="citizen-home-page">
         <AppHeader></AppHeader>
         <div id="tab-menu">
@@ -209,10 +223,15 @@ export function ManagerHomePage() {
                     <p className="key">{t("solved")}</p>
                   </div>
                   <div className="blue-div dashboard-cell">
-                    {avgPer < 100 ? (
-                      <p className="details success">{avgPer + "%"}</p>
+                    {avgPer <= 100 ? (
+                      <p className="details success">
+                        {"-" + (100 - avgPer) + "%"}
+                      </p>
                     ) : (
-                      <p className="details bad">{avgPer + "%"}</p>
+                      <p className="details bad">
+                        {" "}
+                        {"+" + (avgPer - 100) + "%"}
+                      </p>
                     )}
                     <p className="value medium-font">{avgTime}</p>
                     <p className="key">{t("avgTime")}</p>
@@ -224,6 +243,48 @@ export function ManagerHomePage() {
                     <p className="key">{t("maxTime")}</p>
                   </div>
                 </div>
+                <div className="type-pie">
+                  {" "}
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart width={400} height={400}>
+                      <Pie
+                        data={pieData}
+                        cx="50%"
+                        cy="50%"
+                        labelLine={false}
+                        label={renderCustomizedLabel}
+                        outerRadius={120}
+                        fill="#8884d8"
+                        dataKey="value"
+                      >
+                        {pieData.map((entry, index) => (
+                          <Cell
+                            key={`cell-${index}`}
+                            fill={COLORS[index % COLORS.length]}
+                          />
+                        ))}
+                      </Pie>
+                      <Pie
+                        data={pieData}
+                        cx="50%"
+                        cy="50%"
+                        label
+                        innerRadius={122}
+                        outerRadius={140}
+                        fill="#8884d8"
+                        dataKey="value"
+                      >
+                        {pieData.map((entry, index) => (
+                          <Cell
+                            key={`cell-${index}`}
+                            fill={COLORS[index % COLORS.length]}
+                          />
+                        ))}
+                      </Pie>
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+                <ReportMap reports={reports}></ReportMap>
                 <div className="filters-container">
                   <LocalizationProvider dateAdapter={AdapterDayjs}>
                     <DatePicker
@@ -301,3 +362,40 @@ export function ManagerHomePage() {
     )
   );
 }
+
+const data = [
+  { name: "Group A", value: 400 },
+  { name: "Group B", value: 300 },
+  { name: "Group C", value: 300 },
+  { name: "Group D", value: 200 },
+];
+
+const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042"];
+
+const RADIAN = Math.PI / 180;
+const renderCustomizedLabel = ({
+  cx,
+  cy,
+  midAngle,
+  innerRadius,
+  outerRadius,
+  percent,
+  index,
+}) => {
+  const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
+  const x = cx + radius * Math.cos(-midAngle * RADIAN);
+  const y = cy + radius * Math.sin(-midAngle * RADIAN);
+
+  return (
+    <text
+      x={x}
+      y={y}
+      fill="white"
+      textAnchor={x > cx ? "start" : "end"}
+      dominantBaseline="central"
+    >
+      {percent}
+      {/* {`${(percent * 100).toFixed(0)}\n%`} */}
+    </text>
+  );
+};

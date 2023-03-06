@@ -145,8 +145,10 @@
   "days": "dana",
   "hours": "sati",
   "mins": "minuta",
-  "total": "zaprimljeno",
-  "solved": "obrađeno",
+  "total": "prijava zaprimljeno",
+  "solved": "prijava obrađeno",
   "avgTime": "prosječno vrijeme obrade",
-  "maxTime": "najduža obrada"
+  "maxTime": "najduža obrada",
+  "received": "Zaprimljeno",
+  "closed": "Riješeno"
 }
