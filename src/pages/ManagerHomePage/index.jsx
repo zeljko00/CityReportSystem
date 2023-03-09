@@ -19,7 +19,7 @@ import { AppHeader } from "../../layouts/AppHeader";
 import { AppFooter } from "../../layouts/AppFooter";
 import "../../assets/style/CitizenHomePage.css";
 import "../../assets/style/ManagerHomePage.css";
-import { getStats } from "../../services/stats.service";
+import { getStats, getYearStats } from "../../services/stats.service";
 import { getReportTypes } from "../../services/report.service";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
@@ -62,7 +62,7 @@ export function ManagerHomePage() {
       "-" +
       ((date.getMonth() + 1 > 9 ? "" : "0") + (date.getMonth() + 1)) +
       "-" +
-      ((date.getDate() + 1 > 9 ? "" : "0") + date.getDate())
+      ((date.getDate() > 9 ? "" : "0") + date.getDate())
   );
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -80,9 +80,19 @@ export function ManagerHomePage() {
   const [reportsPerDay, setReportsPerDay] = useState(0);
   const [solvedPerDay, setSolvedPerDay] = useState(0);
   const [areaChartData, setAreaChartData] = useState(null);
+
+  const [year, setYear] = useState(date.getFullYear());
+  const [yearTotalReports, setYearTotalReports] = useState(0);
+  const [yearPerDayReports, setYearPerDayReports] = useState(0);
+  const [yearPerDaySolved, setYearPerDaySolved] = useState(0);
+  const [yearSolvedReports, setYearSoldReports] = useState(0);
+  const [yearPerMonthData, setYearPerMonthData] = useState(null);
+  const [yearPerTypeData, setYearPerTypeData] = useState(null);
+  const [yearPerDepartmentData, setYearPerDeprtmentData] = useState(null);
+  const [yearSolvedPercentage, setYearSolvedPercentage] = useState(null);
+
   useEffect(() => {
     if (sessionStorage.getItem("tab") !== null) {
-      console.log("saved tab: " + sessionStorage.getItem("tab"));
       handleChange(null, sessionStorage.getItem("tab"));
     }
     const temp = JSON.parse(sessionStorage.getItem("user"));
@@ -93,6 +103,7 @@ export function ManagerHomePage() {
     ) {
       changeGuest(false);
       fetchData(typeFilter, firstDate, lastDate);
+      fetchYearData(year);
     } else {
       navigate("/CityReportSystem/login");
     }
@@ -106,39 +117,44 @@ export function ManagerHomePage() {
       sessionStorage.clear();
       navigate("/CityReportSystem/login");
     } else if (newValue !== undefined) {
-      console.log("saving tab: " + newValue);
       sessionStorage.setItem("tab", newValue);
       setValue(newValue);
     }
   };
   const handleChangeTypeFilter = (event) => {
     const temp = event.target.value;
-    console.log(temp);
     changeTypeFilter(temp);
     fetchData(temp, firstDate, lastDate);
   };
+  const handleChangeYearFilter = (event) => {
+    const temp = event.target.value;
+    console.log("year to fetch: " + temp);
+    fetchYearData(temp);
+    setYear(temp);
+  };
   const handleChangeFirstDate = (event) => {
+    const month = event.$M + 1;
     const temp =
       event.$y +
       "-" +
-      ((event.$M + 1 > 9 ? "" : "0") + (event.$M + 1)) +
+      ((month > 9 ? "" : "0") + month) +
       "-" +
-      ((event.$D + 1 > 9 ? "" : "0") + event.$D + 1);
-    console.log(temp);
+      ((event.$D > 9 ? "" : "0") + event.$D);
     setFirstDate(temp);
     fetchData(typeFilter, temp, lastDate);
   };
   const handleChangeLastDate = (event) => {
+    const month = event.$M + 1;
     const temp =
       event.$y +
       "-" +
-      ((event.$M + 1 > 9 ? "" : "0") + (event.$M + 1)) +
+      ((month > 9 ? "" : "0") + month) +
       "-" +
-      ((event.$D + 1 > 9 ? "" : "0") + event.$D + 1);
-    console.log(temp);
+      ((event.$D > 9 ? "" : "0") + event.$D);
     setLastDate(temp);
     fetchData(typeFilter, firstDate, temp);
   };
+
   const fetchData = (type, first, last) => {
     getStats(type, first, last).then((response) => {
       setTotalReports(response.data.reports);
@@ -190,14 +206,13 @@ export function ManagerHomePage() {
       setPieData(array);
       const avgTime = [];
       response.data.avgTimePerType.forEach((tuple) => {
-        console.log("avg - " + tuple.type + " - " + tuple.number);
         avgTime.push({
           name: t(tuple.type),
           pv: tuple.number,
           amt: 0.3,
         });
       });
-      console.log(avgTime);
+
       setAvgTimePerType(avgTime);
       const perType = [];
       response.data.reportsPerType.forEach((tuple) => {
@@ -207,7 +222,7 @@ export function ManagerHomePage() {
           amt: 0.3,
         });
       });
-      console.log(perType);
+
       setReportsPerType(perType);
       const temp = [];
       response.data.dataPerDay.forEach((tuple) => {
@@ -217,9 +232,54 @@ export function ManagerHomePage() {
           uv: tuple.solved,
         });
       });
-      console.log(temp);
+
       setAreaChartData(temp);
     });
+  };
+  const fetchYearData = (year) => {
+    getYearStats(year)
+      .catch()
+      .then((response) => {
+        setYearPerDayReports(response.data.receivedPerDay);
+        setYearPerDaySolved(response.data.solvedPerDay);
+        setYearPerTypeData(response.data.perType);
+        setYearTotalReports(response.data.received);
+        setYearSoldReports(response.data.solved);
+        setYearSolvedPercentage(
+          (response.data.solved * 100.0) / response.data.received
+        );
+        const ar = [];
+        response.data.perType.forEach((d) => {
+          ar.push({
+            name: t(d.type),
+            value: d.number / response.data.received,
+          });
+        });
+        setYearPerTypeData(ar);
+
+        const temp = [];
+        response.data.perDepartmentData.forEach((d) => {
+          temp.push({
+            name: d.department,
+            received: d.received,
+            solved: d.solved,
+            avgTime: d.avgTime,
+          });
+        });
+
+        setYearPerDeprtmentData(temp);
+
+        const array = [];
+        response.data.perMonth.forEach((d) => {
+          array.push({
+            name: d.month,
+            received: d.received,
+            solved: d.solved,
+          });
+        });
+
+        setYearPerMonthData(array);
+      });
   };
   const parseTimeInMin = (time) => {
     const days = Math.floor(time / (60 * 24));
@@ -231,10 +291,7 @@ export function ManagerHomePage() {
   };
   return (
     areaChartData &&
-    reportsPerType &&
-    pieData &&
-    avgTimePerType &&
-    reportTypes && (
+    yearPerMonthData && (
       <div className="citizen-home-page">
         <AppHeader></AppHeader>
         <div id="tab-menu">
@@ -387,58 +444,72 @@ export function ManagerHomePage() {
                   </ResponsiveContainer>
                 </div>
                 <div className="area-chart">
-                  <AreaChart
-                    width={1030}
-                    height={250}
-                    data={areaChartData}
-                    margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
-                  >
-                    <defs>
-                      <linearGradient id="colorUv" x1="0" y1="0" x2="0" y2="1">
-                        <stop
-                          offset="5%"
-                          stopColor="#8884d8"
-                          stopOpacity={0.8}
-                        />
-                        <stop
-                          offset="95%"
-                          stopColor="#8884d8"
-                          stopOpacity={0}
-                        />
-                      </linearGradient>
-                      <linearGradient id="colorPv" x1="0" y1="0" x2="0" y2="1">
-                        <stop
-                          offset="5%"
-                          stopColor="#82ca9d"
-                          stopOpacity={0.8}
-                        />
-                        <stop
-                          offset="95%"
-                          stopColor="#82ca9d"
-                          stopOpacity={0}
-                        />
-                      </linearGradient>
-                    </defs>
-                    <XAxis dataKey="name" />
-                    <YAxis />
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <Tooltip />
-                    <Area
-                      type="monotone"
-                      dataKey="uv"
-                      stroke="#8884d8"
-                      fillOpacity={1}
-                      fill="url(#colorUv)"
-                    />
-                    <Area
-                      type="monotone"
-                      dataKey="pv"
-                      stroke="#82ca9d"
-                      fillOpacity={1}
-                      fill="url(#colorPv)"
-                    />
-                    <Legend></Legend>
-                  </AreaChart>
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart
+                      height={250}
+                      width={500}
+                      data={areaChartData}
+                      margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
+                    >
+                      <defs>
+                        <linearGradient
+                          id="colorUv"
+                          x1="0"
+                          y1="0"
+                          x2="0"
+                          y2="1"
+                        >
+                          <stop
+                            offset="5%"
+                            stopColor="#8884d8"
+                            stopOpacity={0.8}
+                          />
+                          <stop
+                            offset="95%"
+                            stopColor="#8884d8"
+                            stopOpacity={0}
+                          />
+                        </linearGradient>
+                        <linearGradient
+                          id="colorPv"
+                          x1="0"
+                          y1="0"
+                          x2="0"
+                          y2="1"
+                        >
+                          <stop
+                            offset="5%"
+                            stopColor="#82ca9d"
+                            stopOpacity={0.8}
+                          />
+                          <stop
+                            offset="95%"
+                            stopColor="#82ca9d"
+                            stopOpacity={0}
+                          />
+                        </linearGradient>
+                      </defs>
+                      <XAxis dataKey="name" />
+                      <YAxis />
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <Tooltip />
+                      <Area
+                        type="monotone"
+                        dataKey="solved"
+                        stroke="#8884d8"
+                        fillOpacity={1}
+                        fill="url(#colorUv)"
+                      />
+                      <Area
+                        type="monotone"
+                        dataKey="received"
+                        stroke="#82ca9d"
+                        fillOpacity={1}
+                        fill="url(#colorPv)"
+                      />
+                      <Legend></Legend>
+                    </AreaChart>
+                  </ResponsiveContainer>
                 </div>
                 <ReportMap reports={reports}></ReportMap>
                 <div className="filters-container">
@@ -480,7 +551,203 @@ export function ManagerHomePage() {
                 </div>
               </div>
             </TabPanel>
-            <TabPanel value="3"></TabPanel>
+            <TabPanel value="3">
+              <div className="dashboard">
+                <div className="dashboard-header">
+                  <div className="blue-div dashboard-cell">
+                    <p className="value large-font">
+                      {yearTotalReports + "  ("}
+                      {yearPerDayReports.toFixed(2)}
+                      <span className="small-font">{" / " + t("perDay")}</span>
+                      {")"}
+                    </p>
+                    <p className="key">{t("total")}</p>
+                  </div>
+                  <div className="purple-div dashboard-cell">
+                    {yearSolvedPercentage >= 100 ? (
+                      <p className="details success">
+                        {yearSolvedPercentage + "%"}
+                      </p>
+                    ) : (
+                      <p className="details bad">
+                        {yearSolvedPercentage + "%"}
+                      </p>
+                    )}
+                    <p className="value large-font">
+                      {yearSolvedReports + "  ("}
+                      {yearPerDaySolved.toFixed(2)}
+                      <span className="small-font">{" / " + t("perDay")}</span>
+                      {")"}
+                    </p>
+                    <p className="key">{t("solved")}</p>
+                  </div>
+                </div>
+                <div className="type-pie">
+                  {" "}
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart width={600} height={600}>
+                      <Pie
+                        data={yearPerTypeData}
+                        cx="75%"
+                        cy="50%"
+                        labelLine={false}
+                        label={renderCustomizedLabel}
+                        outerRadius={120}
+                        fill="#8884d8"
+                        dataKey="value"
+                      >
+                        {pieData.map((entry, index) => (
+                          <Cell
+                            key={`cell-${index}`}
+                            fill={COLORS[index % COLORS.length]}
+                          />
+                        ))}
+                      </Pie>
+                      <Legend
+                        verticalAlign="center"
+                        height={36}
+                        layout="vertical"
+                      />
+                      <Tooltip />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+
+                <div className="time-for-solving-per-type">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart
+                      width={500}
+                      height={300}
+                      data={yearPerDepartmentData}
+                      margin={{
+                        top: 5,
+                        right: 30,
+                        left: 20,
+                        bottom: 5,
+                      }}
+                    >
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="name" />
+                      <YAxis dataKey="received" />
+                      <Tooltip />
+
+                      <Bar dataKey="received" fill="#8884d8" />
+                      <Bar dataKey="solved" fill="#ffc658" />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+                <div className="time-for-solving-per-type">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart
+                      width={500}
+                      height={300}
+                      data={yearPerDepartmentData}
+                      margin={{
+                        top: 5,
+                        right: 30,
+                        left: 20,
+                        bottom: 5,
+                      }}
+                    >
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="name" />
+                      <YAxis dataKey="avgTime" />
+                      <Tooltip />
+                      <Bar dataKey="avgTime" fill="#8884d8" />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+                <div className="area-chart">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart
+                      height={250}
+                      width={500}
+                      data={yearPerMonthData}
+                      margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
+                    >
+                      <defs>
+                        <linearGradient
+                          id="colorUv"
+                          x1="0"
+                          y1="0"
+                          x2="0"
+                          y2="1"
+                        >
+                          <stop
+                            offset="5%"
+                            stopColor="#8884d8"
+                            stopOpacity={0.8}
+                          />
+                          <stop
+                            offset="95%"
+                            stopColor="#8884d8"
+                            stopOpacity={0}
+                          />
+                        </linearGradient>
+                        <linearGradient
+                          id="colorPv"
+                          x1="0"
+                          y1="0"
+                          x2="0"
+                          y2="1"
+                        >
+                          <stop
+                            offset="5%"
+                            stopColor="#82ca9d"
+                            stopOpacity={0.8}
+                          />
+                          <stop
+                            offset="95%"
+                            stopColor="#82ca9d"
+                            stopOpacity={0}
+                          />
+                        </linearGradient>
+                      </defs>
+                      <XAxis dataKey="name" />
+                      <YAxis />
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <Tooltip />
+                      <Area
+                        type="monotone"
+                        dataKey="solved"
+                        stroke="#8884d8"
+                        fillOpacity={1}
+                        fill="url(#colorUv)"
+                      />
+                      <Area
+                        type="monotone"
+                        dataKey="received"
+                        stroke="#82ca9d"
+                        fillOpacity={1}
+                        fill="url(#colorPv)"
+                      />
+                      <Legend></Legend>
+                    </AreaChart>
+                  </ResponsiveContainer>
+                </div>
+                <div className="filters-container">
+                  <FormControl sx={{ m: 1, minWidth: 200 }} fullwidth>
+                    <InputLabel id="demo-simple-select-label">
+                      {t("year")}
+                    </InputLabel>
+                    <Select
+                      value={year}
+                      labelId="demo-simple-select-label"
+                      id="demo-simple-select"
+                      label={t("year")}
+                      onChange={handleChangeYearFilter}
+                    >
+                      <MenuItem key={2022} value={2022}>
+                        2022
+                      </MenuItem>
+                      <MenuItem key={2023} value={2023}>
+                        2023
+                      </MenuItem>
+                    </Select>
+                  </FormControl>
+                </div>
+              </div>
+            </TabPanel>
           </TabContext>
         </div>
         <div id="lng-select">

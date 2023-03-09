@@ -9,3 +9,11 @@ export function getStats(type, start, end) {
     }
   );
 }
+export function getYearStats(year) {
+  console.log(year);
+  return axios.get("/CityReportSystem/statistics/" + year, {
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+}

@@ -60,11 +60,14 @@
     color: red
 }
 .type-pie{
-    height: 300px;
+    height: 500px;
 }
 .time-for-solving-per-type{
     height: 400px;
 }
 .small-font{
     font-size: 1.5vmax;
+}
+.area-chart{
+    height: 400px;
 }
