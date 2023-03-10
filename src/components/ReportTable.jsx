@@ -523,7 +523,7 @@ function Row(props) {
         }
       }
       setState(event.target.value);
-      changeState(user.department.id, row.id, event.target.value)
+      changeState(user.id, row.id, event.target.value)
         .catch()
         .then((response) => {
           changeMsg("stateChanged");
