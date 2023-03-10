@@ -144,6 +144,7 @@
     right:0;
     bottom: 0;
     z-index: 1000;
+    max-width: 100vw;
 }
 .wrapper{
     display: flex;
@@ -182,6 +183,7 @@
 }
 .citizen-home-page{
     background-image: linear-gradient( to bottom, #fdfbfb,    #d0dbe0 );
+    width: 100%;
 }
 #hidden-tab{
     display: none;

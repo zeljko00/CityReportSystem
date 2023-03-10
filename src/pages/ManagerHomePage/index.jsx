@@ -208,7 +208,7 @@ export function ManagerHomePage() {
       response.data.avgTimePerType.forEach((tuple) => {
         avgTime.push({
           name: t(tuple.type),
-          pv: tuple.number,
+          h: tuple.number,
           amt: 0.3,
         });
       });
@@ -218,7 +218,7 @@ export function ManagerHomePage() {
       response.data.reportsPerType.forEach((tuple) => {
         perType.push({
           name: t(tuple.type),
-          pv: tuple.number,
+          n: tuple.number,
           amt: 0.3,
         });
       });
@@ -228,8 +228,8 @@ export function ManagerHomePage() {
       response.data.dataPerDay.forEach((tuple) => {
         temp.push({
           name: tuple.date,
-          pv: tuple.received,
-          uv: tuple.solved,
+          zaprimljeno: tuple.received,
+          obrađeno: tuple.solved,
         });
       });
 
@@ -261,20 +261,21 @@ export function ManagerHomePage() {
         response.data.perDepartmentData.forEach((d) => {
           temp.push({
             name: d.department,
-            received: d.received,
-            solved: d.solved,
-            avgTime: d.avgTime,
+            zaprimljeno: d.received,
+            obrađeno: d.solved,
+            h: d.avgTime,
           });
         });
 
         setYearPerDeprtmentData(temp);
 
         const array = [];
+
         response.data.perMonth.forEach((d) => {
           array.push({
             name: d.month,
-            received: d.received,
-            solved: d.solved,
+            zaprimljeno: d.received,
+            obrađeno: d.solved,
           });
         });
 
@@ -324,7 +325,7 @@ export function ManagerHomePage() {
               <div className="dashboard">
                 <div className="dashboard-header">
                   <div className="blue-div dashboard-cell">
-                    <p className="value large-font">
+                    <p className="value large-font medium-top-margin">
                       {totalReports + "  ("}
                       {reportsPerDay.toFixed(2)}
                       <span className="small-font">{" / " + t("perDay")}</span>
@@ -338,7 +339,7 @@ export function ManagerHomePage() {
                     ) : (
                       <p className="details bad">{solvedPer + "%"}</p>
                     )}
-                    <p className="value large-font">
+                    <p className="value large-font large-top-margin">
                       {solvedReports + "  ("}
                       {solvedPerDay.toFixed(2)}
                       <span className="small-font">{" / " + t("perDay")}</span>
@@ -357,13 +358,17 @@ export function ManagerHomePage() {
                         {"+" + (avgPer - 100) + "%"}
                       </p>
                     )}
-                    <p className="value medium-font">{avgTime}</p>
+                    <p className="value medium-font custom-top-margin">
+                      {avgTime}
+                    </p>
                     <p className="key">{t("avgTime")}</p>
                   </div>
                   <div className="purple-div dashboard-cell">
                     <p className="details bad">{differencePer + "%"}</p>
 
-                    <p className="value medium-font">{maxTime.value}</p>
+                    <p className="value medium-font custom-top-margin">
+                      {maxTime.value}
+                    </p>
                     <p className="key">
                       {t("maxTime") + " (" + t(maxTime.type) + ")"}
                     </p>
@@ -375,7 +380,7 @@ export function ManagerHomePage() {
                     <PieChart width={700} height={400}>
                       <Pie
                         data={pieData}
-                        cx="62%"
+                        cx="37%"
                         cy="50%"
                         labelLine={false}
                         label={renderCustomizedLabel}
@@ -391,14 +396,16 @@ export function ManagerHomePage() {
                         ))}
                       </Pie>
                       <Legend
-                        verticalAlign="center"
-                        height={36}
+                        verticalAlign="top"
+                        align="left"
+                        height={26}
                         layout="vertical"
                       />
                       <Tooltip />
                     </PieChart>
                   </ResponsiveContainer>
                 </div>
+                <div className="legend">{t("perTypePercentage")}</div>
                 <div className="time-for-solving-per-type">
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart
@@ -414,13 +421,14 @@ export function ManagerHomePage() {
                     >
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis dataKey="name" />
-                      <YAxis dataKey="pv" />
+                      <YAxis dataKey="h" />
                       <Tooltip />
 
-                      <Bar dataKey="pv" fill="#8884d8" />
+                      <Bar dataKey="h" fill="#8884d8" />
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
+                <div className="legend">{t("timePerType")}</div>
                 <div className="time-for-solving-per-type">
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart
@@ -436,13 +444,14 @@ export function ManagerHomePage() {
                     >
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis dataKey="name" />
-                      <YAxis dataKey="pv" />
+                      <YAxis dataKey="n" />
                       <Tooltip />
 
-                      <Bar dataKey="pv" fill="#8884d8" />
+                      <Bar dataKey="n" fill="#8884d8" />
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
+                <div className="legend">{t("reportsPerType")}</div>
                 <div className="area-chart">
                   <ResponsiveContainer width="100%" height="100%">
                     <AreaChart
@@ -490,19 +499,19 @@ export function ManagerHomePage() {
                         </linearGradient>
                       </defs>
                       <XAxis dataKey="name" />
-                      <YAxis />
+                      <YAxis dataKey="zaprimljeno" />
                       <CartesianGrid strokeDasharray="3 3" />
                       <Tooltip />
                       <Area
                         type="monotone"
-                        dataKey="solved"
+                        dataKey="obrađeno"
                         stroke="#8884d8"
                         fillOpacity={1}
                         fill="url(#colorUv)"
                       />
                       <Area
                         type="monotone"
-                        dataKey="received"
+                        dataKey="zaprimljeno"
                         stroke="#82ca9d"
                         fillOpacity={1}
                         fill="url(#colorPv)"
@@ -511,6 +520,7 @@ export function ManagerHomePage() {
                     </AreaChart>
                   </ResponsiveContainer>
                 </div>
+                <div className="legend">{t("dynamicPerDay")}</div>
                 <ReportMap reports={reports}></ReportMap>
                 <div className="filters-container">
                   <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -555,7 +565,7 @@ export function ManagerHomePage() {
               <div className="dashboard">
                 <div className="dashboard-header">
                   <div className="blue-div dashboard-cell">
-                    <p className="value large-font">
+                    <p className="value large-font medium-top-margin">
                       {yearTotalReports + "  ("}
                       {yearPerDayReports.toFixed(2)}
                       <span className="small-font">{" / " + t("perDay")}</span>
@@ -564,16 +574,16 @@ export function ManagerHomePage() {
                     <p className="key">{t("total")}</p>
                   </div>
                   <div className="purple-div dashboard-cell">
-                    {yearSolvedPercentage >= 100 ? (
+                    {yearSolvedPercentage >= 80 ? (
                       <p className="details success">
-                        {yearSolvedPercentage + "%"}
+                        {yearSolvedPercentage.toFixed(2) + "%"}
                       </p>
                     ) : (
                       <p className="details bad">
-                        {yearSolvedPercentage + "%"}
+                        {yearSolvedPercentage.toFixed(2) + "%"}
                       </p>
                     )}
-                    <p className="value large-font">
+                    <p className="value large-font large-top-margin">
                       {yearSolvedReports + "  ("}
                       {yearPerDaySolved.toFixed(2)}
                       <span className="small-font">{" / " + t("perDay")}</span>
@@ -585,18 +595,19 @@ export function ManagerHomePage() {
                 <div className="type-pie">
                   {" "}
                   <ResponsiveContainer width="100%" height="100%">
-                    <PieChart width={600} height={600}>
+                    <PieChart width={400} height={400}>
                       <Pie
                         data={yearPerTypeData}
-                        cx="75%"
+                        cx="37%"
                         cy="50%"
                         labelLine={false}
                         label={renderCustomizedLabel}
-                        outerRadius={120}
+                        outerRadius={140}
                         fill="#8884d8"
                         dataKey="value"
+                        la
                       >
-                        {pieData.map((entry, index) => (
+                        {yearPerTypeData.map((entry, index) => (
                           <Cell
                             key={`cell-${index}`}
                             fill={COLORS[index % COLORS.length]}
@@ -604,15 +615,16 @@ export function ManagerHomePage() {
                         ))}
                       </Pie>
                       <Legend
-                        verticalAlign="center"
-                        height={36}
+                        verticalAlign="top"
+                        align="left"
+                        height={26}
                         layout="vertical"
                       />
                       <Tooltip />
                     </PieChart>
                   </ResponsiveContainer>
                 </div>
-
+                <div className="legend">{t("perTypePercentage")}</div>
                 <div className="time-for-solving-per-type">
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart
@@ -628,14 +640,15 @@ export function ManagerHomePage() {
                     >
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis dataKey="name" />
-                      <YAxis dataKey="received" />
+                      <YAxis dataKey="zaprimljeno" />
                       <Tooltip />
 
-                      <Bar dataKey="received" fill="#8884d8" />
-                      <Bar dataKey="solved" fill="#ffc658" />
+                      <Bar dataKey="zaprimljeno" fill="#8884d8" />
+                      <Bar dataKey="obrađeno" fill="#ffc658" />
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
+                <div className="legend">{t("perDepartment")}</div>
                 <div className="time-for-solving-per-type">
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart
@@ -651,12 +664,13 @@ export function ManagerHomePage() {
                     >
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis dataKey="name" />
-                      <YAxis dataKey="avgTime" />
+                      <YAxis dataKey="h" />
                       <Tooltip />
-                      <Bar dataKey="avgTime" fill="#8884d8" />
+                      <Bar dataKey="h" fill="#8884d8" />
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
+                <div className="legend">{t("perDepartmentTime")}</div>
                 <div className="area-chart">
                   <ResponsiveContainer width="100%" height="100%">
                     <AreaChart
@@ -709,14 +723,14 @@ export function ManagerHomePage() {
                       <Tooltip />
                       <Area
                         type="monotone"
-                        dataKey="solved"
+                        dataKey="obrađeno"
                         stroke="#8884d8"
                         fillOpacity={1}
                         fill="url(#colorUv)"
                       />
                       <Area
                         type="monotone"
-                        dataKey="received"
+                        dataKey="zaprimljeno"
                         stroke="#82ca9d"
                         fillOpacity={1}
                         fill="url(#colorPv)"
@@ -725,6 +739,7 @@ export function ManagerHomePage() {
                     </AreaChart>
                   </ResponsiveContainer>
                 </div>
+                <div className="legend">{t("dynamic")}</div>
                 <div className="filters-container">
                   <FormControl sx={{ m: 1, minWidth: 200 }} fullwidth>
                     <InputLabel id="demo-simple-select-label">

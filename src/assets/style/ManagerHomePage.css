@@ -1,15 +1,19 @@
 .filters-container{
    display: flex;
    justify-content: center;
+   margin-top: 30px;
 }
 .dashboard{
     display: block;
+    width: 100%;
 }
 .dashboard-header{
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
-    width: 100%;
+    margin: auto;
+    justify-content: center;
+    margin-bottom: 60px;
 }
 .blue-div{
     background-image: url("../images/dashboard2.png");
@@ -22,20 +26,21 @@
     background-size: 100% 100%;
     background-position: center;
     flex-grow: 1;
-   min-width: 343px;
+   max-width: 343px;
+   min-width: 333px;
     min-height: 188px;
-    margin: 10px;
-   
+    margin: 7px;
+   padding: 8px;
     background-repeat: no-repeat;
 
 }
 .large-font{
-    font-size: 3vmax;
-    margin-top: 20px;
+    font-size: calc( 35px + 1vh );
+  
 }
 .medium-font{
-    font-size: 1.4vmax;
-    margin-top: 45px;
+    font-size: calc( 17px + 1vh );
+  
 }
 .value{
     color: white;
@@ -43,15 +48,17 @@
    
 }
 .key{
-    font-size: 1.2vmax;
+    font-size: calc( 16px + 1vh );
     color: rgb(162, 166, 170);
-    margin-left: 22px
+    margin-left: 22px;
+    margin-bottom: 0px;
 }
 .details{
-    font-size: 1.5vmax;
+    font-size: calc( 16px + 1vh );
     text-align: right;
     margin-right: 20px;
-    margin-top: 10px;
+    font-weight: 600;
+  
 }
 .success{
     color: rgb(48, 248, 75);
@@ -60,14 +67,31 @@
     color: red
 }
 .type-pie{
-    height: 500px;
+    height: 350px;
+    width: 500px;
+    margin: auto;
 }
 .time-for-solving-per-type{
-    height: 400px;
+    height: 500px;
 }
 .small-font{
-    font-size: 1.5vmax;
+    font-size: calc( 12px + 1vh );
 }
 .area-chart{
-    height: 400px;
+    height: 550px;
+}
+.large-top-margin{
+    margin-top: 42px;
+}
+.medium-top-margin{
+    margin-top: 72px;
+}
+.legend{
+    text-align: center;
+    font-style: italic;
+    color: rgb(139, 147, 153);
+    margin-bottom: 70px;
+}
+.custom-top-margin{
+    margin-top: 66px;
 }

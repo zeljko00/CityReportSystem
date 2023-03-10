@@ -154,5 +154,13 @@
   "avgTimeInHrs": "proječno vrijeme u satima",
   "reportPerDay": "zaprimljeno po danu",
   "solvedperDay": "obrađeno po danu",
-  "perDay": "dan"
+  "perDay": "dan",
+  "perTypePercentage": "Pregled učešća pojedinih tipova prijava",
+  "perDepartment": "Pregled pristiglih i obrađenih prijava po službama",
+  "perDepartmentTime": "Pregled vremena potrebnog za obradu prijave po službama (u časovima)",
+  "dynamic": "Pregled dinamike pristizanja i obrađivanja prijava po mjesecima",
+  "year": "Godina",
+  "timePerType": "Pregled prosječnog vremena obrade brijave po tipu (u časovima)",
+  "reportsPerType": "Pregled pristiglih prijava po tipu",
+  "dynamicPerDay": "Pregled dinamike pristizanja i obrađivanja prijava po danu"
 }
