@@ -1,6 +1,6 @@
-import axios from "axios";
+import { client } from "./axios.service";
 export function getServices() {
-  return axios.get("/CityReportSystem/cityServices", {
-    headers: { "Content-Type": "application/json" },
+  return client.get("/CityReportSystem/cityServices", {
+    authorization: false,
   });
 }

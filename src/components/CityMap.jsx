@@ -23,7 +23,7 @@ function CityMap() {
         response.data.forEach((event) => {
           console.log(event);
           event.coords.forEach((area) => {
-            let counter = 1;
+            const counter = Math.random();
             const coordinates = [];
             area.forEach((c) => {
               coordinates.push([c.x, c.y]);
@@ -38,7 +38,7 @@ function CityMap() {
                   ? dangerOptions
                   : workOptions,
               coords: coordinates,
-              id: event.id + "-" + counter++,
+              id: event.id + "-" + counter,
             };
             console.log(poly);
             temp.push(poly);

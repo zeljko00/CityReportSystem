@@ -1,19 +1,29 @@
-import axios from "axios";
+import { client } from "./axios.service";
+// export function getStats(type, start, end) {
+//   return axios.get(
+//     "/CityReportSystem/statistics/" + start + "/" + end + "/" + type,
+//     {
+//       headers: {
+//         "Content-Type": "application/json",
+//       },
+//     }
+//   );
+// }
 export function getStats(type, start, end) {
-  return axios.get(
+  return client.get(
     "/CityReportSystem/statistics/" + start + "/" + end + "/" + type,
-    {
-      headers: {
-        "Content-Type": "application/json",
-      },
-    }
+
+    { authorization: true }
   );
 }
+// export function getYearStats(year) {
+//   console.log(year);
+//   return axios.get("/CityReportSystem/statistics/" + year, {
+//     headers: {
+//       "Content-Type": "application/json",
+//     },
+//   });
+// }
 export function getYearStats(year) {
-  console.log(year);
-  return axios.get("/CityReportSystem/statistics/" + year, {
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
+  return client.get("/CityReportSystem/statistics/" + year);
 }

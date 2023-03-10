@@ -1,5 +1,5 @@
+import { client } from "./axios.service";
 import axios from "axios";
-
 export function login(username, password) {
   const credentials = btoa(username + ":" + password);
   return axios.get("/CityReportSystem/login", {
@@ -19,7 +19,5 @@ export function createCitizen(citizen) {
     idCard: citizen.idCard,
     password: citizen.passwordHash,
   };
-  return axios.post("/CityReportSystem/signup", c, {
-    headers: { "Content-Type": "application/json" },
-  });
+  return client.post("/CityReportSystem/signup", c);
 }
