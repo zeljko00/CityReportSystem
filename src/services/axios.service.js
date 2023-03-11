@@ -1,5 +1,5 @@
 import { createAxiosClient } from "./request.interceptor";
-const BASE_URL = "";
+const BASE_URL = "http://localhost:8080";
 function getToken() {
   try {
     const token = JSON.parse(sessionStorage.getItem("user")).token;
