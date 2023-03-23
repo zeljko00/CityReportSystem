@@ -17,6 +17,7 @@ initializeI18n();
 
 function App() {
   return (
+    // proksiranje ne radi kada se aplikacija deploy
     <Router>
       {/* Bira se prva ruta cija se vrijednost path atributa poklopi (zbog exact) sa specifikovanim url-om */}
       <Routes>

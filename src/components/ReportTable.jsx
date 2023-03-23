@@ -13,6 +13,7 @@ import InputLabel from "@mui/material/InputLabel";
 import Select from "@mui/material/Select";
 import Paper from "@mui/material/Paper";
 import TableCell from "@mui/material/TableCell";
+import { BASE_URL } from "../services/axios.service";
 import { visuallyHidden } from "@mui/utils";
 import { useTranslation } from "react-i18next";
 import TextField from "@mui/material/TextField";
@@ -733,7 +734,8 @@ function Row(props) {
                           <div key={img.id} className="img-container">
                             <img
                               src={
-                                "http://localhost:8080/CityReportSystem/reports/images/" +
+                                BASE_URL +
+                                "/CityReportSystem/reports/images/" +
                                 img.id
                               }
                               style={contentStyle}

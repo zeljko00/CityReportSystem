@@ -1,8 +1,8 @@
-import { client } from "./axios.service";
+import { client, BASE_URL } from "./axios.service";
 import axios from "axios";
 export function login(username, password) {
   const credentials = btoa(username + ":" + password);
-  return axios.get("http://localhost:8080/CityReportSystem/login", {
+  return axios.get(BASE_URL + "/CityReportSystem/login", {
     headers: {
       "Content-Type": "application/json",
       Authorization: "Basic " + credentials,

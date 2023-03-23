@@ -3,6 +3,7 @@ import { MapContainer, TileLayer, Marker, Popup, Polygon } from "react-leaflet";
 import L from "leaflet";
 import { getActiveEvents } from "../services/eventService";
 import "leaflet/dist/leaflet.css";
+import { BASE_URL } from "../services/axios.service";
 import "../assets/style/CityMap.css";
 import Accordion from "@mui/material/Accordion";
 import AccordionSummary from "@mui/material/AccordionSummary";
@@ -141,8 +142,8 @@ function CityMap() {
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
         {events &&
-          events.map((event) =>
-            event.type === "INFO"
+          events.map((event) => {
+            return event.type === "INFO"
               ? addMarkers(
                   event.title,
                   event.description,
@@ -158,7 +159,7 @@ function CityMap() {
               : event.type === "DANGER"
               ? addMarkers(
                   event.title,
-                  event.desc,
+                  event.description,
                   event.info,
                   event.date,
                   event.x,
@@ -170,7 +171,7 @@ function CityMap() {
                 )
               : addMarkers(
                   event.title,
-                  event.desc,
+                  event.description,
                   event.info,
                   event.date,
                   event.x,
@@ -179,8 +180,8 @@ function CityMap() {
                   event.creator.department.name,
                   event.images,
                   t
-                )
-          )}
+                );
+          })}
         ;
         <Polygon pathOptions={limeOptions} positions={polygon} />
         {polygons &&
@@ -198,6 +199,7 @@ function CityMap() {
   );
 }
 function addMarkers(title, desc, info, date, x, y, type, creator, images, t) {
+  console.log(title + "   " + desc);
   const contentStyle = {
     margin: "auto",
     height: "270px",
@@ -268,7 +270,8 @@ function addMarkers(title, desc, info, date, x, y, type, creator, images, t) {
                   <div key={img.id}>
                     <img
                       src={
-                        "http://localhost:8080/CityReportSystem/events/active/images/" +
+                        BASE_URL +
+                        "/CityReportSystem/events/active/images/" +
                         img.id
                       }
                       style={contentStyle}
